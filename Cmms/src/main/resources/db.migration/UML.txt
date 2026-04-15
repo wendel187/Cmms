@@ -1,0 +1,67 @@
++----------------------+
+|     Equipamento      |
++----------------------+
+| - id: int            |
+| - nome: String       |
+| - codigo: String     |
+| - dataAquisicao: Date|
+| - status: String     |
++----------------------+
+| + cadastrar()        |
+| + atualizar()        |
+| + excluir()          |
++----------------------+
+
+           1
+           |
+           | possui
+           |
+           N
+
++----------------------+
+|   OrdemServico       |
++----------------------+
+| - id: int            |
+| - descricao: String  |
+| - status: String     |
+| - tipo: String       |
+| - dataAbertura: Date |
+| - dataFechamento:Date|
++----------------------+
+| + criar()            |
+| + atualizarStatus()  |
+| + adicionarMaterial()|
++----------------------+
+
+           N
+           |
+           | atribuída a
+           |
+           1
+
++----------------------+
+|      Tecnico         |
++----------------------+
+| - id: int            |
+| - nome: String       |
+| - especialidade: String|
+| - contato: String    |
++----------------------+
+| + cadastrar()        |
+| + atualizar()        |
++----------------------+
+
+           1
+           |
+           | utiliza
+           |
+           N
+
++----------------------+
+|      Material        |
++----------------------+
+| - id: int            |
+| - nome: String       |
+| - quantidade: int    |
+| - custo: double      |
++----------------------+
