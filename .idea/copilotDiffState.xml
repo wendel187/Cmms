@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="/DadosCadastroEquipamento (snapshot).java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/DadosCadastroEquipamento (snapshot).java" />
+              <option name="originalContent" value="package com.example.Cmms.domain.equipamento;&#10;&#10;import jakarta.validation.constraints.NotBlank;&#10;&#10;public record DadosCadastroEquipamento(&#10;        @NotBlank&#10;        String nome,&#10;        &#10;        @NotBlank&#10;        String codigo,&#10;&#10;        @NotBlank&#10;        Status status&#10;) {&#10;}&#10;&#10;" />
+              <option name="updatedContent" value="package com.example.Cmms.domain.equipamento;&#10;&#10;import jakarta.validation.constraints.NotBlank;&#10;import jakarta.validation.constraints.NotNull;&#10;&#10;public record DadosCadastroEquipamento(&#10;        @NotBlank&#10;        String nome,&#10;        &#10;        @NotBlank&#10;        String codigo,&#10;&#10;        @NotNull&#10;        Status status&#10;) {&#10;}&#10;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="/EquipamentoController (snapshot).java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/EquipamentoController (snapshot).java" />
+              <option name="originalContent" value="package controller;&#10;&#10;import domain.equipamento.DadosCadastroEquipamento;&#10;import domain.equipamento.DadosDetalhamentoEquipamento;&#10;import domain.equipamento.Equipamento;&#10;import domain.equipamento.EquipamentoRepository;&#10;import jakarta.validation.Valid;&#10;import org.springframework.beans.factory.annotation.Autowired;&#10;import org.springframework.http.ResponseEntity;&#10;import org.springframework.transaction.annotation.Transactional;&#10;import org.springframework.web.bind.annotation.PostMapping;&#10;import org.springframework.web.bind.annotation.RequestBody;&#10;import org.springframework.web.bind.annotation.RequestMapping;&#10;import org.springframework.web.bind.annotation.RestController;&#10;import org.springframework.web.util.UriComponentsBuilder;&#10;&#10;&#10;@RestController&#10;@RequestMapping(&quot;equipamento&quot;)&#10;public class EquipamentoController {&#10;&#10;    @Autowired&#10;    private EquipamentoRepository repository;&#10;&#10;    @PostMapping&#10;    @Transactional&#10;    public ResponseEntity cadastrarEquipamento(@RequestBody @Valid DadosCadastroEquipamento dados, UriComponentsBuilder uriBuilder) {&#10;        var equipamento = new Equipamento(null, dados.nome(), dados.codigo(), dados.status(), null);&#10;        repository.save(equipamento);&#10;&#10;        var uri = uriBuilder.path(&quot;/equipamentos/{id}&quot;).buildAndExpand(equipamento.getId()).toUri();&#10;        var dto = new DadosDetalhamentoEquipamento(equipamento);&#10;        return ResponseEntity.created(uri).body(dto);&#10;    }&#10;&#10;&#10;}&#10;" />
+              <option name="updatedContent" value="package com.example.Cmms.controller;&#10;&#10;import com.example.Cmms.domain.equipamento.DadosCadastroEquipamento;&#10;import com.example.Cmms.domain.equipamento.DadosDetalhamentoEquipamento;&#10;import com.example.Cmms.domain.equipamento.Equipamento;&#10;import com.example.Cmms.domain.equipamento.EquipamentoRepository;&#10;import jakarta.validation.Valid;&#10;import org.springframework.beans.factory.annotation.Autowired;&#10;import org.springframework.http.ResponseEntity;&#10;import org.springframework.transaction.annotation.Transactional;&#10;import org.springframework.web.bind.annotation.PostMapping;&#10;import org.springframework.web.bind.annotation.RequestBody;&#10;import org.springframework.web.bind.annotation.RequestMapping;&#10;import org.springframework.web.bind.annotation.RestController;&#10;import org.springframework.web.util.UriComponentsBuilder;&#10;&#10;&#10;@RestController&#10;@RequestMapping(&quot;equipamento&quot;)&#10;public class EquipamentoController {&#10;&#10;    @Autowired&#10;    private EquipamentoRepository repository;&#10;&#10;    @PostMapping&#10;    @Transactional&#10;    public ResponseEntity cadastrarEquipamento(@RequestBody @Valid DadosCadastroEquipamento dados, UriComponentsBuilder uriBuilder) {&#10;        var equipamento = new Equipamento(null, dados.nome(), dados.codigo(), dados.status(), null);&#10;        repository.save(equipamento);&#10;&#10;        var uri = uriBuilder.path(&quot;/equipamentos/{id}&quot;).buildAndExpand(equipamento.getId()).toUri();&#10;        var dto = new DadosDetalhamentoEquipamento(equipamento);&#10;        return ResponseEntity.created(uri).body(dto);&#10;    }&#10;&#10;&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
