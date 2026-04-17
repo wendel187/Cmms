@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMMS - Gerenciamento de Equipamentos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <span class="logo">⚙️ CMMS</span>
+                <span class="title">Sistema de Gerenciamento de Manutenção</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Página de Listagem -->
+        <section id="listagem-section" class="section active">
+            <div class="section-header">
+                <h1>Equipamentos</h1>
+                <p class="subtitle">Visualize e gerencie todos os seus equipamentos ativos</p>
+            </div>
+
+            <!-- Filtros e Controles -->
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="🔍 Buscar equipamento..." maxlength="50">
+                </div>
+                <button class="btn btn-primary" onclick="reloadEquipamentos()">
+                    🔄 Recarregar
+                </button>
+            </div>
+
+            <!-- Status de Carregamento -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Carregando equipamentos...</p>
+            </div>
+
+            <!-- Mensagem de Erro -->
+            <div id="error-message" class="error-message hidden"></div>
+
+            <!-- Tabela de Equipamentos -->
+            <div id="tabela-container" class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Código</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="equipamentos-tbody">
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum equipamento encontrado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            <div id="paginacao-container" class="pagination-wrapper hidden">
+                <div class="pagination">
+                    <button class="btn btn-small" id="prev-btn" onclick="previousPage()">← Anterior</button>
+                    <span id="page-info" class="page-info">Página 1</span>
+                    <button class="btn btn-small" id="next-btn" onclick="nextPage()">Próxima →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Detalhe -->
+        <section id="detalhe-section" class="section">
+            <div class="detalhe-container">
+                <button class="btn btn-secondary btn-small" onclick="voltarParaListagem()">← Voltar</button>
+                
+                <div id="loading-detalhe" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Carregando detalhes...</p>
+                </div>
+
+                <div id="error-detalhe" class="error-message hidden"></div>
+
+                <div id="detalhe-content" class="detalhe-content hidden">
+                    <div class="detalhe-header">
+                        <h1 id="detalhe-nome">Carregando...</h1>
+                        <span id="detalhe-status" class="badge"></span>
+                    </div>
+
+                    <div class="detalhe-info">
+                        <div class="info-item">
+                            <label>ID</label>
+                            <p id="detalhe-id">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Código</label>
+                            <p id="detalhe-codigo">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Status</label>
+                            <p id="detalhe-status-texto">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Data de Criação</label>
+                            <p id="detalhe-criacao">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 CMMS - Todos os direitos reservados | Backend conectado em <strong>http://localhost:8080</strong></p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
