@@ -26,6 +26,11 @@ public class Equipamento {
     @Enumerated(EnumType.STRING)
     private Status status;
     
+    @Enumerated(EnumType.STRING)
+    private Criticidade criticidade;
+    
+    private String setor;
+
     @CreationTimestamp
     private LocalDate dataAquisicao;
 
@@ -38,6 +43,12 @@ public class Equipamento {
         }
         if (dados.status() != null) {
             this.status = dados.status();
+        }
+        if (dados.criticidade() != null) {
+            this.criticidade = dados.criticidade();
+        }
+        if (dados.setor() != null) {
+            this.setor = dados.setor();
         }
     }
 

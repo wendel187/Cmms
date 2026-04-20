@@ -11,7 +11,13 @@ public record DadosCadastroEquipamento(
         String codigo,
 
         @NotNull
-        Status status
+        Status status,
+        
+        @NotNull
+        Criticidade criticidade,
+        
+        @NotBlank
+        String setor
 ) {
 }
 

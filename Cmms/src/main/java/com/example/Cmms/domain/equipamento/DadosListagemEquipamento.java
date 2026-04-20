@@ -7,6 +7,8 @@ public record DadosListagemEquipamento(
         String nome,
         String codigo,
         Status status,
+        Criticidade criticidade,
+        String setor,
         LocalDate dataAquisicao
 ) {
     public DadosListagemEquipamento(Equipamento equipamento) {
@@ -15,6 +17,8 @@ public record DadosListagemEquipamento(
                 equipamento.getNome(),
                 equipamento.getCodigo(),
                 equipamento.getStatus(),
+                equipamento.getCriticidade(),
+                equipamento.getSetor(),
                 equipamento.getDataAquisicao()
         );
     }

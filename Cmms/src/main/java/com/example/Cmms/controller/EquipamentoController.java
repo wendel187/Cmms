@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/equipamento")
 public class EquipamentoController {
@@ -24,13 +26,7 @@ public class EquipamentoController {
             @RequestBody @Valid DadosCadastroEquipamento dados,
             UriComponentsBuilder uriBuilder) {
 
-        var equipamento = new Equipamento(
-                null,
-                dados.nome(),
-                dados.codigo(),
-                dados.status(),
-                null
-        );
+        var equipamento = new Equipamento(dados);
         repository.save(equipamento);
         var uri = uriBuilder
                 .path("/equipamentos/{id}")
@@ -57,6 +53,24 @@ public class EquipamentoController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/setor/{setor}")
+    public ResponseEntity listarEquipamentosPorSetor(@PathVariable String setor) {
+        var equipamentos = repository.findBySetor(setor);
+        var dto = equipamentos.stream()
+                .map(DadosListagemEquipamento::new)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/criticidade/{criticidade}")
+    public ResponseEntity<Page<DadosListagemEquipamento>> listarEquipamentosPorCriticidade(
+            @PathVariable Criticidade criticidade,
+            @PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
+        var page = repository.findByCriticidade(criticidade, paginacao)
+                .map(DadosListagemEquipamento::new);
+        return ResponseEntity.ok(page);
+    }
+
     @PutMapping
     @Transactional
     public ResponseEntity atualizarEquipamento(@RequestBody @Valid DadosAtualizacaoEquipamento dados) {
@@ -72,19 +86,6 @@ public class EquipamentoController {
         equipamento.excluir();
         return ResponseEntity.noContent().build();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

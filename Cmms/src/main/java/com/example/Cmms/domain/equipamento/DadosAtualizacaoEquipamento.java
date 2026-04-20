@@ -7,7 +7,9 @@ public record DadosAtualizacaoEquipamento(
         Long id,
         String nome,
         String codigo,
-        Status status
+        Status status,
+        Criticidade criticidade,
+        String setor
 ) {
 }
 
