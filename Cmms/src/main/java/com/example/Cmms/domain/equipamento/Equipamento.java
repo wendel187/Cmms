@@ -34,6 +34,15 @@ public class Equipamento {
     @CreationTimestamp
     private LocalDate dataAquisicao;
 
+    // Construtor customizado para aceitar DadosCadastroEquipamento
+    public Equipamento(DadosCadastroEquipamento dados) {
+        this.nome = dados.nome();
+        this.codigo = dados.codigo();
+        this.status = dados.status();
+        this.criticidade = dados.criticidade();
+        this.setor = dados.setor();
+    }
+
     public void atualizarInformacoes(DadosAtualizacaoEquipamento dados) {
         if (dados.nome() != null) {
             this.nome = dados.nome();

@@ -1,0 +1,700 @@
+{
+  "info": {
+    "_postman_id": "cmms-collection-2024",
+    "name": "CMMS API",
+    "description": "Collection de endpoints para testar a API CMMS (Computerized Maintenance Management System)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "EQUIPAMENTO",
+      "item": [
+        {
+          "name": "Criar Equipamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Compressor AR\",\n  \"codigo\": \"COMP-001\",\n  \"status\": \"ATIVO\",\n  \"criticidade\": \"ALTA\",\n  \"setor\": \"Produção\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/equipamento",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Equipamentos (Ativos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/equipamento?page=0&size=10&sort=nome,asc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "nome,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter Equipamento por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/equipamento/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Equipamentos por Setor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/equipamento/setor/Produção",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento",
+                "setor",
+                "Produção"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Equipamentos por Criticidade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/equipamento/criticidade/ALTA?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento",
+                "criticidade",
+                "ALTA"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Equipamento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nome\": \"Compressor AR - Atualizado\",\n  \"codigo\": \"COMP-001-UPD\",\n  \"status\": \"ATIVO\",\n  \"criticidade\": \"MEDIA\",\n  \"setor\": \"Produção\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/equipamento",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Excluir Equipamento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/equipamento/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "equipamento",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "TÉCNICO",
+      "item": [
+        {
+          "name": "Criar Técnico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao.silva@cmms.com\",\n  \"telefone\": \"11987654321\",\n  \"especialidade\": \"Eletrônica\",\n  \"setor\": \"Produção\",\n  \"status\": \"DISPONIVEL\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/tecnico",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Técnicos (Ativos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico?page=0&size=10&sort=nome,asc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "nome,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter Técnico por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Técnicos por Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico/status/DISPONIVEL?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico",
+                "status",
+                "DISPONIVEL"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Técnicos por Setor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico/setor/Produção",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico",
+                "setor",
+                "Produção"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Técnico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nome\": \"João Pedro Silva\",\n  \"email\": \"joao.pedro@cmms.com\",\n  \"telefone\": \"11987654322\",\n  \"especialidade\": \"Eletrônica e Mecânica\",\n  \"status\": \"DISPONIVEL\",\n  \"setor\": \"Produção\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/tecnico",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desativar Técnico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tecnico",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDEM DE SERVIÇO",
+      "item": [
+        {
+          "name": "Criar OS Corretiva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipamentoId\": 1,\n  \"tecnicoId\": 1,\n  \"descricao\": \"Compressor não está ligando\",\n  \"descricaoFalha\": \"Motor não responde ao comando\",\n  \"setor\": \"Produção\",\n  \"falhaTotal\": true,\n  \"nivelCriticidade\": 3\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/corretiva",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "corretiva"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar OS Preventiva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipamentoId\": 1,\n  \"tecnicoId\": 1,\n  \"descricao\": \"Manutenção preventiva do compressor\",\n  \"setor\": \"Produção\",\n  \"dataPrevista\": \"2024-05-15\",\n  \"periodicidadeDias\": 30,\n  \"ultimaManutencao\": \"2024-03-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/preventiva",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "preventiva"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Todas as Ordens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico?page=0&size=10&sort=dataAbertura,desc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "dataAbertura,desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Ordens Abertas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/abertas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "abertas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Ordens por Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/status/ABERTA?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "status",
+                "ABERTA"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Ordens por Técnico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/tecnico/1?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "tecnico",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Ordens por Setor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/setor/Produção",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "setor",
+                "Produção"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter Ordem por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status da Ordem",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"novoStatus\": \"EM_ANDAMENTO\",\n  \"observacoes\": \"Iniciando o reparo do compressor\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter Histórico da Ordem",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1/historico",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "1",
+                "historico"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Relatório - Top Prioridade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/relatorios/top-prioridade?limite=5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "relatorios",
+                "top-prioridade"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Relatório - Setores com Ordens Abertas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/relatorios/setores-com-abertas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "relatorios",
+                "setores-com-abertas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancelar Ordem",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
+
