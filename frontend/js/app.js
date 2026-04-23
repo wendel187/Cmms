@@ -1,6 +1,4 @@
-// ============================================
-// CONFIGURAÇÃO
-// ============================================
+
 
 const API_URL = 'http://localhost:8080';
 const API_EQUIPAMENTOS = `${API_URL}/equipamento`;
@@ -10,18 +8,12 @@ const pageSize = 10;
 let allEquipamentos = [];
 let filteredEquipamentos = [];
 
-// ============================================
-// INICIALIZAÇÃO
-// ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarEquipamentos();
     setupSearchListener();
 });
 
-// ============================================
-// BUSCAR E CARREGAR EQUIPAMENTOS
-// ============================================
 
 async function carregarEquipamentos(page = 0) {
     const loadingEl = document.getElementById('loading');
