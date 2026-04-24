@@ -47,6 +47,6 @@ echo ║  - Abra http://localhost:3000 em seu navegador                ║
 echo ║  - Verifique o console para mensagens de erro                 ║
 echo ║  - Para parar, feche as janelas do Prompt de Comando          ║
 echo ╚════════════════════════════════════════════════════════════════╝
-echo.
+echo.Organize my front-end code so that each page has its files and code, do not do everything on a single page
 
 pause

@@ -3,123 +3,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMMS - Gerenciamento de Equipamentos</title>
+    <title>CMMS - Sistema de Gerenciamento de Manutenção</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-brand">
-                <span class="logo">⚙️ CMMS</span>
-                <span class="title">Sistema de Gerenciamento de Manutenção</span>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚙️ CMMS</h1>
+                <p>Computerized Maintenance Management System</p>
+            </div>
+            <div class="header-status">
+                <span id="status-conexao" class="status-badge loading">Verificando...</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="home">
+                <span class="icon">🏠</span> Inicial
+            </button>
+            <button class="tab-btn" data-tab="tecnicos">
+                <span class="icon">👨‍🔧</span> Técnicos
+            </button>
+            <button class="tab-btn" data-tab="equipamentos">
+                <span class="icon">🔧</span> Equipamentos
+            </button>
+            <button class="tab-btn" data-tab="requisicoes">
+                <span class="icon">📋</span> Requisições OS
+            </button>
+            <button class="tab-btn" data-tab="ordens">
+                <span class="icon">📊</span> Ordens de Serviço
+            </button>
+            <button class="tab-btn" data-tab="atualizar-tecnico">
+                <span class="icon">✏️</span> Atualizar Técnico
+            </button>
+            <button class="tab-btn" data-tab="atualizar-os">
+                <span class="icon">🔄</span> Atualizar OS
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- TAB: HOME - Cadastros -->
+            <section id="home-tab" class="tab-content active">
+                <div class="section-grid">
+                    <!-- Cadastro de Técnico -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2>👨‍🔧 Cadastrar Técnico</h2>
+                            <p class="section-subtitle">Adicionar novo técnico ao sistema</p>
+                        </div>
+                        <form id="form-tecnico" class="form">
+                            <div class="form-group">
+                                <label for="tecnico-nome">Nome *</label>
+                                <input type="text" id="tecnico-nome" name="nome" required placeholder="Ex: João Silva">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="tecnico-email">Email *</label>
+                                    <input type="email" id="tecnico-email" name="email" required placeholder="joao@cmms.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tecnico-telefone">Telefone *</label>
+                                    <input type="tel" id="tecnico-telefone" name="telefone" required placeholder="11 98765-4321">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="tecnico-especialidade">Especialidade *</label>
+                                    <input type="text" id="tecnico-especialidade" name="especialidade" required placeholder="Ex: Eletrônica">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tecnico-setor">Setor *</label>
+                                    <input type="text" id="tecnico-setor" name="setor" required placeholder="Ex: Produção">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tecnico-status">Status *</label>
+                                <select id="tecnico-status" name="status" required>
+                                    <option value="">Selecionar...</option>
+                                    <option value="DISPONIVEL">Disponível</option>
+                                    <option value="EM_PAUSA">Em Pausa</option>
+                                    <option value="INDISPONIVEL">Indisponível</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">➕</span> Cadastrar Técnico
+                            </button>
+                        </form>
+                        <div id="tecnico-feedback" class="feedback"></div>
+                    </div>
+
+                    <!-- Cadastro de Equipamento -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2>🔧 Cadastrar Equipamento</h2>
+                            <p class="section-subtitle">Adicionar novo equipamento ao sistema</p>
+                        </div>
+                        <form id="form-equipamento" class="form">
+                            <div class="form-group">
+                                <label for="equip-nome">Nome *</label>
+                                <input type="text" id="equip-nome" name="nome" required placeholder="Ex: Compressor AR">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="equip-codigo">Código *</label>
+                                    <input type="text" id="equip-codigo" name="codigo" required placeholder="COMP-001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="equip-setor">Setor *</label>
+                                    <input type="text" id="equip-setor" name="setor" required placeholder="Ex: Produção">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="equip-status">Status *</label>
+                                    <select id="equip-status" name="status" required>
+                                        <option value="">Selecionar...</option>
+                                        <option value="ATIVO" selected>Ativo</option>
+                                        <option value="INATIVO">Inativo</option>
+                                        <option value="MANUTENCAO">Manutenção</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="equip-criticidade">Criticidade *</label>
+                                    <select id="equip-criticidade" name="criticidade" required>
+                                        <option value="">Selecionar...</option>
+                                        <option value="ALTA">Alta</option>
+                                        <option value="MEDIA">Média</option>
+                                        <option value="BAIXA">Baixa</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">➕</span> Cadastrar Equipamento
+                            </button>
+                        </form>
+                        <div id="equipamento-feedback" class="feedback"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: TÉCNICOS - Gerenciar Técnicos -->
+            <section id="tecnicos-tab" class="tab-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>👨‍🔧 Técnicos Cadastrados</h2>
+                        <button type="button" class="btn btn-secondary" onclick="recarregarTecnicos()">
+                            <span class="icon">🔄</span> Recarregar
+                        </button>
+                    </div>
+                    <div id="tecnicos-list-page" class="items-list"></div>
+                </div>
+            </section>
+
+            <!-- TAB: EQUIPAMENTOS - Gerenciar Equipamentos -->
+            <section id="equipamentos-tab" class="tab-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>🔧 Equipamentos Cadastrados</h2>
+                        <button type="button" class="btn btn-secondary" onclick="recarregarEquipamentos()">
+                            <span class="icon">🔄</span> Recarregar
+                        </button>
+                    </div>
+                    <div id="equipamentos-list-page" class="items-list"></div>
+                </div>
+            </section>
+
+            <!-- TAB: REQUISIÇÕES - Criar OS -->
+            <section id="requisicoes-tab" class="tab-content">
+                <div class="requisicoes-container">
+                    <div class="tipo-os-selector">
+                        <button class="tipo-btn active" data-tipo="corretiva">
+                            <span class="icon">🔴</span> OS Corretiva
+                        </button>
+                        <button class="tipo-btn" data-tipo="preventiva">
+                            <span class="icon">🟡</span> OS Preventiva
+                        </button>
+                    </div>
+
+                    <!-- OS CORRETIVA -->
+                    <div id="form-corretiva-container" class="requisicao-form-container active">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>🔴 Nova Ordem de Serviço - Corretiva</h2>
+                                <p class="section-subtitle">Solicitação de conserto urgente</p>
+                            </div>
+                            <form id="form-os-corretiva" class="form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="corr-equipamento">Equipamento *</label>
+                                        <select id="corr-equipamento" name="equipamentoId" required>
+                                            <option value="">Selecionar...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="corr-tecnico">Técnico Responsável *</label>
+                                        <select id="corr-tecnico" name="tecnicoId" required>
+                                            <option value="">Selecionar...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="corr-descricao">Descrição do Problema *</label>
+                                    <textarea id="corr-descricao" name="descricao" required rows="3" placeholder="Descreva o problema..."></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="corr-falha">Descrição da Falha *</label>
+                                    <textarea id="corr-falha" name="descricaoFalha" required rows="3" placeholder="Detalhe a falha detectada..."></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="corr-setor">Setor *</label>
+                                        <input type="text" id="corr-setor" name="setor" required placeholder="Ex: Produção">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="corr-criticidade">Nível de Criticidade *</label>
+                                        <select id="corr-criticidade" name="nivelCriticidade" required>
+                                            <option value="">Selecionar...</option>
+                                            <option value="1">1 - Baixa</option>
+                                            <option value="2">2 - Média</option>
+                                            <option value="3">3 - Alta</option>
+                                            <option value="4">4 - Crítica</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="corr-falha-total" name="falhaTotal">
+                                        <span>Falha Total (Equipamento não funciona)</span>
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-large">
+                                    <span class="icon">📤</span> Abrir OS Corretiva
+                                </button>
+                            </form>
+                            <div id="corretiva-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <!-- OS PREVENTIVA -->
+                    <div id="form-preventiva-container" class="requisicao-form-container">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>🟡 Nova Ordem de Serviço - Preventiva</h2>
+                                <p class="section-subtitle">Manutenção programada e preventiva</p>
+                            </div>
+                            <form id="form-os-preventiva" class="form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="prev-equipamento">Equipamento *</label>
+                                        <select id="prev-equipamento" name="equipamentoId" required>
+                                            <option value="">Selecionar...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prev-tecnico">Técnico Responsável *</label>
+                                        <select id="prev-tecnico" name="tecnicoId" required>
+                                            <option value="">Selecionar...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="prev-descricao">Descrição da Manutenção *</label>
+                                    <textarea id="prev-descricao" name="descricao" required rows="3" placeholder="Descreva a manutenção a ser realizada..."></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="prev-setor">Setor *</label>
+                                        <input type="text" id="prev-setor" name="setor" required placeholder="Ex: Produção">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prev-data-prevista">Data Prevista *</label>
+                                        <input type="date" id="prev-data-prevista" name="dataPrevista" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="prev-periodicidade">Periodicidade (dias) *</label>
+                                        <input type="number" id="prev-periodicidade" name="periodicidadeDias" required min="1" placeholder="30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prev-ultima-manutencao">Última Manutenção</label>
+                                        <input type="date" id="prev-ultima-manutencao" name="ultimaManutencao">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-large">
+                                    <span class="icon">📤</span> Abrir OS Preventiva
+                                </button>
+                            </form>
+                            <div id="preventiva-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: LISTAGEM - Consultar -->
+            <section id="listagem-tab" class="tab-content">
+                <div class="listagem-container">
+                    <div class="listagem-tabs">
+                        <button class="listagem-btn active" data-listagem="tecnicos">
+                            <span class="icon">👨‍🔧</span> Técnicos
+                        </button>
+                        <button class="listagem-btn" data-listagem="equipamentos">
+                            <span class="icon">🔧</span> Equipamentos
+                        </button>
+                        <button class="listagem-btn" data-listagem="ordens">
+                            <span class="icon">📋</span> Ordens de Serviço
+                        </button>
+                    </div>
+
+                    <!-- LISTAGEM TÉCNICOS -->
+                    <div id="listagem-tecnicos" class="listagem-content active">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>👨‍🔧 Técnicos Cadastrados</h2>
+                                <button type="button" class="btn btn-secondary" onclick="recarregarTecnicos()">
+                                    <span class="icon">🔄</span> Recarregar
+                                </button>
+                            </div>
+                            <div id="tecnicos-list" class="items-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- LISTAGEM EQUIPAMENTOS -->
+                    <div id="listagem-equipamentos" class="listagem-content">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>🔧 Equipamentos Cadastrados</h2>
+                                <button type="button" class="btn btn-secondary" onclick="recarregarEquipamentos()">
+                                    <span class="icon">🔄</span> Recarregar
+                                </button>
+                            </div>
+                            <div id="equipamentos-list" class="items-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- LISTAGEM ORDENS -->
+                    <div id="listagem-ordens" class="listagem-content">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>📋 Ordens de Serviço Abertas</h2>
+                                <button type="button" class="btn btn-secondary" onclick="recarregarOrdens()">
+                                    <span class="icon">🔄</span> Recarregar
+                                </button>
+                            </div>
+                            <div id="ordens-list" class="items-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: ORDENS - Visualizar Ordens -->
+            <section id="ordens-tab" class="tab-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>📋 Ordens de Serviço</h2>
+                        <button type="button" class="btn btn-secondary" onclick="recarregarOrdens()">
+                            <span class="icon">🔄</span> Recarregar
+                        </button>
+                    </div>
+                    <div id="ordens-list-page" class="items-list"></div>
+                </div>
+            </section>
+
+            <!-- TAB: ATUALIZAR TÉCNICO -->
+            <section id="atualizar-tecnico-tab" class="tab-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>✏️ Atualizar Técnico</h2>
+                        <p class="section-subtitle">Editar informações do técnico</p>
+                    </div>
+                    <form id="form-atualizar-tecnico" class="form">
+                        <div class="form-group">
+                            <label for="atualizar-tecnico-id">Selecionar Técnico *</label>
+                            <select id="atualizar-tecnico-id" name="tecnicoId" required onchange="carregarDadosTecnico(this.value)">
+                                <option value="">Selecionar técnico...</option>
+                            </select>
+                        </div>
+
+                        <div id="tecnico-form-container" style="display: none;">
+                            <div class="form-group">
+                                <label for="atualizar-tecnico-nome">Nome *</label>
+                                <input type="text" id="atualizar-tecnico-nome" name="nome" required placeholder="Ex: João Silva">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="atualizar-tecnico-email">Email *</label>
+                                    <input type="email" id="atualizar-tecnico-email" name="email" required placeholder="joao@cmms.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="atualizar-tecnico-telefone">Telefone *</label>
+                                    <input type="tel" id="atualizar-tecnico-telefone" name="telefone" required placeholder="11 98765-4321">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="atualizar-tecnico-especialidade">Especialidade *</label>
+                                    <input type="text" id="atualizar-tecnico-especialidade" name="especialidade" required placeholder="Ex: Eletrônica">
+                                </div>
+                                <div class="form-group">
+                                    <label for="atualizar-tecnico-setor">Setor *</label>
+                                    <input type="text" id="atualizar-tecnico-setor" name="setor" required placeholder="Ex: Produção">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="atualizar-tecnico-status">Status *</label>
+                                <select id="atualizar-tecnico-status" name="status" required>
+                                    <option value="">Selecionar...</option>
+                                    <option value="DISPONIVEL">Disponível</option>
+                                    <option value="EM_PAUSA">Em Pausa</option>
+                                    <option value="INDISPONIVEL">Indisponível</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="icon">✅</span> Atualizar Técnico
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="limparFormularioTecnico()">
+                                    <span class="icon">❌</span> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="atualizar-tecnico-feedback" class="feedback"></div>
+                </div>
+            </section>
+
+            <!-- TAB: ATUALIZAR OS -->
+            <section id="atualizar-os-tab" class="tab-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>🔄 Atualizar Ordem de Serviço</h2>
+                        <p class="section-subtitle">Editar status e informações da OS</p>
+                    </div>
+                    <form id="form-atualizar-os" class="form">
+                        <div class="form-group">
+                            <label for="atualizar-os-id">Selecionar Ordem de Serviço *</label>
+                            <select id="atualizar-os-id" name="osId" required onchange="carregarDadosOS(this.value)">
+                                <option value="">Selecionar OS...</option>
+                            </select>
+                        </div>
+
+                        <div id="os-form-container" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="atualizar-os-status">Status *</label>
+                                    <select id="atualizar-os-status" name="status" required>
+                                        <option value="">Selecionar...</option>
+                                        <option value="ABERTA">Aberta</option>
+                                        <option value="EM_ANDAMENTO">Em Andamento</option>
+                                        <option value="CONCLUIDA">Concluída</option>
+                                        <option value="CANCELADA">Cancelada</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="atualizar-os-tecnico">Técnico Responsável *</label>
+                                    <select id="atualizar-os-tecnico" name="tecnicoId" required>
+                                        <option value="">Selecionar...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="atualizar-os-descricao">Descrição</label>
+                                <textarea id="atualizar-os-descricao" name="descricao" rows="3" placeholder="Descrição da OS..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="atualizar-os-setor">Setor</label>
+                                    <input type="text" id="atualizar-os-setor" name="setor" placeholder="Ex: Produção">
+                                </div>
+                                <div class="form-group">
+                                    <label for="atualizar-os-data-conclusao">Data de Conclusão</label>
+                                    <input type="date" id="atualizar-os-data-conclusao" name="dataConclusao">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="icon">✅</span> Atualizar OS
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="limparFormularioOS()">
+                                    <span class="icon">❌</span> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="atualizar-os-feedback" class="feedback"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+
+        <!-- Modal para detalhes de OS -->
+        <div id="modal-os" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-os-title">Detalhes da Ordem de Serviço</h2>
+                    <button class="modal-close" onclick="fecharModalOS()">&times;</button>
+                </div>
+                <div id="modal-os-body" class="modal-body">
+                    <!-- Conteúdo carregado dinamicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="fecharModalOS()">Fechar</button>
+                </div>
             </div>
         </div>
-    </nav>
-
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Página de Listagem -->
-        <section id="listagem-section" class="section active">
-            <div class="section-header">
-                <h1>Equipamentos</h1>
-                <p class="subtitle">Visualize e gerencie todos os seus equipamentos ativos</p>
-            </div>
-
-            <!-- Filtros e Controles -->
-            <div class="controls">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="🔍 Buscar equipamento..." maxlength="50">
-                </div>
-                <button class="btn btn-primary" onclick="reloadEquipamentos()">
-                    🔄 Recarregar
-                </button>
-            </div>
-
-            <!-- Status de Carregamento -->
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>Carregando equipamentos...</p>
-            </div>
-
-            <!-- Mensagem de Erro -->
-            <div id="error-message" class="error-message hidden"></div>
-
-            <!-- Tabela de Equipamentos -->
-            <div id="tabela-container" class="table-wrapper">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Código</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="equipamentos-tbody">
-                        <tr>
-                            <td colspan="5" class="text-center">Nenhum equipamento encontrado</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Paginação -->
-            <div id="paginacao-container" class="pagination-wrapper hidden">
-                <div class="pagination">
-                    <button class="btn btn-small" id="prev-btn" onclick="previousPage()">← Anterior</button>
-                    <span id="page-info" class="page-info">Página 1</span>
-                    <button class="btn btn-small" id="next-btn" onclick="nextPage()">Próxima →</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Página de Detalhe -->
-        <section id="detalhe-section" class="section">
-            <div class="detalhe-container">
-                <button class="btn btn-secondary btn-small" onclick="voltarParaListagem()">← Voltar</button>
-                
-                <div id="loading-detalhe" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Carregando detalhes...</p>
-                </div>
-
-                <div id="error-detalhe" class="error-message hidden"></div>
-
-                <div id="detalhe-content" class="detalhe-content hidden">
-                    <div class="detalhe-header">
-                        <h1 id="detalhe-nome">Carregando...</h1>
-                        <span id="detalhe-status" class="badge"></span>
-                    </div>
-
-                    <div class="detalhe-info">
-                        <div class="info-item">
-                            <label>ID</label>
-                            <p id="detalhe-id">-</p>
-                        </div>
-                        <div class="info-item">
-                            <label>Código</label>
-                            <p id="detalhe-codigo">-</p>
-                        </div>
-                        <div class="info-item">
-                            <label>Status</label>
-                            <p id="detalhe-status-texto">-</p>
-                        </div>
-                        <div class="info-item">
-                            <label>Data de Criação</label>
-                            <p id="detalhe-criacao">-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 CMMS - Todos os direitos reservados | Backend conectado em <strong>http://localhost:8080</strong></p>
-    </footer>
 
     <script src="js/app.js"></script>
 </body>
