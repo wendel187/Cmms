@@ -74,27 +74,6 @@ function inicializarEventos() {
     document.getElementById('form-os-preventiva').addEventListener('submit', criarOSPreventiva);
     document.getElementById('form-atualizar-tecnico').addEventListener('submit', atualizarTecnico);
     document.getElementById('form-atualizar-os').addEventListener('submit', atualizarOS);
-
-    // Fechar modal ao clicar fora (no fundo escuro)
-    const modalOS = document.getElementById('modal-os');
-    if (modalOS) {
-        modalOS.addEventListener('click', (e) => {
-            // Se clicou no fundo (modal), fechar
-            if (e.target === modalOS) {
-                fecharModalOS();
-            }
-        });
-    }
-
-    // Fechar modal ao pressionar ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('modal-os');
-            if (modal && modal.classList.contains('show')) {
-                fecharModalOS();
-            }
-        }
-    });
 }
 
 // ==================== NAVEGAÇÃO ENTRE ABAS ====================
@@ -667,7 +646,7 @@ async function carregarOrdensPage() {
             `;
         } else {
             listEl.innerHTML = ordens.map(o => `
-                <div class="item-card-large" onclick="abrirModalOS(${o.id})">
+                <div class="item-card-large">
                     <div class="item-title clickable">📋 OS #${o.id} - ${o.descricao.substring(0, 60)}...</div>
                     <div class="item-detail">
                         <div class="item-detail-row">
@@ -695,131 +674,6 @@ async function carregarOrdensPage() {
         document.getElementById('ordens-list-page').innerHTML = `<div class="error-message">❌ Erro ao carregar ordens de serviço</div>`;
     }
 }
-
-// ==================== MODAL PARA DETALHES DE OS ====================
-async function abrirModalOS(osId) {
-    const modal = document.getElementById('modal-os');
-    const body = document.getElementById('modal-os-body');
-    
-    try {
-        // Mostrar modal com carregamento
-        document.getElementById('modal-os-title').textContent = '⏳ Carregando...';
-        body.innerHTML = `<div style="text-align: center; padding: 40px;"><p>⏳ Carregando dados da OS...</p></div>`;
-        modal.classList.add('show');
-        
-        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/${osId}`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('Ordem de Serviço não encontrada (404)');
-            } else if (response.status === 500) {
-                throw new Error('Erro no servidor ao carregar OS (500)');
-            } else {
-                throw new Error(`Erro ao carregar OS: ${response.status}`);
-            }
-        }
-        
-        const os = await response.json();
-
-        const titulo = `📋 Ordem de Serviço #${os.id}`;
-        document.getElementById('modal-os-title').textContent = titulo;
-        
-        body.innerHTML = `
-            <div class="modal-details">
-                <div class="detail-section">
-                    <h3>📋 Informações Gerais</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">ID:</span>
-                        <span><strong>#${os.id}</strong></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Status:</span>
-                        <span>${getStatusBadge(os.status)}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Setor:</span>
-                        <span>${os.setor || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Data de Abertura:</span>
-                        <span>${formatarData(os.dataAbertura)}</span>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h3>🔧 Equipamento e Técnico</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Equipamento:</span>
-                        <span>${os.equipamento ? os.equipamento.nome + ' (#' + os.equipamento.id + ')' : 'ID #' + os.equipamentoId}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Técnico:</span>
-                        <span>${os.tecnico ? os.tecnico.nome + ' (#' + os.tecnico.id + ')' : 'ID #' + os.tecnicoId}</span>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h3>📝 Descrição da OS</h3>
-                    <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${os.descricao || '-'}</p>
-                </div>
-
-                ${os.descricaoFalha ? `
-                <div class="detail-section">
-                    <h3>⚠️ Descrição da Falha</h3>
-                    <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${os.descricaoFalha}</p>
-                </div>
-                ` : ''}
-
-                ${os.nivelCriticidade ? `
-                <div class="detail-section">
-                    <h3>🎯 Nível de Criticidade</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Prioridade:</span>
-                        <span>${getPrioridadeBadge(os.prioridade || os.nivelCriticidade * 3)}</span>
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Erro ao carregar detalhes da OS:', error);
-        document.getElementById('modal-os-title').textContent = '❌ Erro ao Carregar';
-        body.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: var(--danger);">
-                <h3 style="margin-bottom: 10px;">❌ Erro ao Carregar</h3>
-                <p style="margin: 10px 0; font-size: 1rem;">${error.message}</p>
-                <p style="margin: 10px 0; font-size: 0.85rem; color: var(--secondary);">Verifique se o servidor está disponível</p>
-            </div>
-        `;
-    }
-}
-
-function fecharModalOS() {
-    const modal = document.getElementById('modal-os');
-    if (modal) {
-        modal.classList.remove('show');
-        
-        // Limpar conteúdo
-        const title = document.getElementById('modal-os-title');
-        const body = document.getElementById('modal-os-body');
-        
-        if (title) title.textContent = 'Detalhes da Ordem de Serviço';
-        if (body) body.innerHTML = '';
-        
-        // Garantir que o modal fica invisível
-        modal.style.display = 'none';
-        setTimeout(() => {
-            if (!modal.classList.contains('show')) {
-                modal.style.display = 'none';
-            }
-        }, 100);
-    }
-}
-
 
 
 // ==================== ATUALIZAR TÉCNICO ====================
