@@ -1,0 +1,277 @@
+{
+  "info": {
+    "name": "CMMS - UPDATE (PUT) Operations",
+    "description": "Coleção de exemplos para testar os endpoints PUT (UPDATE) do sistema CMMS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "TÉCNICOS",
+      "item": [
+        {
+          "name": "Listar Todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico?page=0&size=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["tecnico"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["tecnico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Técnico (Nome e Email)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva Atualizado\",\n  \"email\": \"joao.silva@company.com\",\n  \"telefone\": null,\n  \"especialidade\": null,\n  \"status\": null,\n  \"setor\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["tecnico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Técnico (Todos os campos)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao.silva@company.com\",\n  \"telefone\": \"11987654321\",\n  \"especialidade\": \"Elétrica\",\n  \"status\": \"DISPONIVEL\",\n  \"setor\": \"Manutenção\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["tecnico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status do Técnico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": null,\n  \"email\": null,\n  \"telefone\": null,\n  \"especialidade\": null,\n  \"status\": \"INDISPONIVEL\",\n  \"setor\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/tecnico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["tecnico", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDENS DE SERVIÇO",
+      "item": [
+        {
+          "name": "Listar Todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico?page=0&size=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Abertas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/abertas",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "abertas"]
+            }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Descrição",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Manutenção preventiva do compressor principal\",\n  \"status\": null,\n  \"tecnicoId\": null,\n  \"observacoes\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status para EM_ANDAMENTO",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": null,\n  \"status\": \"EM_ANDAMENTO\",\n  \"tecnicoId\": null,\n  \"observacoes\": \"Iniciado\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status para CONCLUIDA",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Manutenção concluída com sucesso\",\n  \"status\": \"CONCLUIDA\",\n  \"tecnicoId\": null,\n  \"observacoes\": \"Tudo funcionando perfeitamente\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Técnico Responsável",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": null,\n  \"status\": null,\n  \"tecnicoId\": 2,\n  \"observacoes\": \"Transferência de técnico\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Todos os Campos",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Manutenção completa do equipamento X\",\n  \"status\": \"EM_ANDAMENTO\",\n  \"tecnicoId\": 3,\n  \"observacoes\": \"Iniciado agora, previsão 4 horas\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status (endpoint alternativo)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"novoStatus\": \"CANCELADA\",\n  \"observacoes\": \"Cancelada pelo cliente\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["ordens-servico", "status"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

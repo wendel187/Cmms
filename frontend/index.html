@@ -395,42 +395,52 @@
                     <form id="form-atualizar-tecnico" class="form">
                         <div class="form-group">
                             <label for="atualizar-tecnico-id">Selecionar Técnico *</label>
-                            <select id="atualizar-tecnico-id" name="tecnicoId" required onchange="carregarDadosTecnico(this.value)">
-                                <option value="">Selecionar técnico...</option>
-                            </select>
+                            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <select id="atualizar-tecnico-id" name="tecnicoId" required onchange="carregarDadosTecnico(this.value)">
+                                        <option value="">Selecionar técnico...</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="btn-editar-tecnico" class="btn btn-warning" onclick="ativarEdicaoTecnico()" title="Editar informações do técnico">
+                                    <span class="icon">✏️</span> Editar
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="deletarTecnicoSelecionado()" title="Deletar o técnico selecionado">
+                                    <span class="icon">🗑️</span> Deletar
+                                </button>
+                            </div>
                         </div>
 
                         <div id="tecnico-form-container" style="display: none;">
                             <div class="form-group">
                                 <label for="atualizar-tecnico-nome">Nome *</label>
-                                <input type="text" id="atualizar-tecnico-nome" name="nome" required placeholder="Ex: João Silva">
+                                <input type="text" id="atualizar-tecnico-nome" name="nome" required placeholder="Ex: João Silva" disabled>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-email">Email *</label>
-                                    <input type="email" id="atualizar-tecnico-email" name="email" required placeholder="joao@cmms.com">
+                                    <input type="email" id="atualizar-tecnico-email" name="email" required placeholder="joao@cmms.com" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-telefone">Telefone *</label>
-                                    <input type="tel" id="atualizar-tecnico-telefone" name="telefone" required placeholder="11 98765-4321">
+                                    <input type="tel" id="atualizar-tecnico-telefone" name="telefone" required placeholder="11 98765-4321" disabled>
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-especialidade">Especialidade *</label>
-                                    <input type="text" id="atualizar-tecnico-especialidade" name="especialidade" required placeholder="Ex: Eletrônica">
+                                    <input type="text" id="atualizar-tecnico-especialidade" name="especialidade" required placeholder="Ex: Eletrônica" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-setor">Setor *</label>
-                                    <input type="text" id="atualizar-tecnico-setor" name="setor" required placeholder="Ex: Produção">
+                                    <input type="text" id="atualizar-tecnico-setor" name="setor" required placeholder="Ex: Produção" disabled>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="atualizar-tecnico-status">Status *</label>
-                                <select id="atualizar-tecnico-status" name="status" required>
+                                <select id="atualizar-tecnico-status" name="status" required disabled>
                                     <option value="">Selecionar...</option>
                                     <option value="DISPONIVEL">Disponível</option>
                                     <option value="EM_PAUSA">Em Pausa</option>
@@ -439,11 +449,11 @@
                             </div>
 
                             <div class="form-row">
-                                <button type="submit" class="btn btn-primary">
-                                    <span class="icon">✅</span> Atualizar Técnico
+                                <button id="btn-salvar-tecnico" type="submit" class="btn btn-primary" style="display: none;">
+                                    <span class="icon">💾</span> Salvar Alterações
                                 </button>
-                                <button type="button" class="btn btn-secondary" onclick="limparFormularioTecnico()">
-                                    <span class="icon">❌</span> Limpar
+                                <button id="btn-cancelar-tecnico" type="button" class="btn btn-secondary" onclick="cancelarEdicaoTecnico()" style="display: none;">
+                                    <span class="icon">❌</span> Cancelar
                                 </button>
                             </div>
                         </div>
@@ -462,16 +472,26 @@
                     <form id="form-atualizar-os" class="form">
                         <div class="form-group">
                             <label for="atualizar-os-id">Selecionar Ordem de Serviço *</label>
-                            <select id="atualizar-os-id" name="osId" required onchange="carregarDadosOS(this.value)">
-                                <option value="">Selecionar OS...</option>
-                            </select>
+                            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <select id="atualizar-os-id" name="osId" required onchange="carregarDadosOS(this.value)">
+                                        <option value="">Selecionar OS...</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="btn-editar-os" class="btn btn-warning" onclick="ativarEdicaoOS()" title="Editar informações da OS">
+                                    <span class="icon">✏️</span> Editar
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="deletarOSSelecionada()" title="Cancelar a ordem selecionada">
+                                    <span class="icon">🗑️</span> Deletar
+                                </button>
+                            </div>
                         </div>
 
                         <div id="os-form-container" style="display: none;">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-os-status">Status *</label>
-                                    <select id="atualizar-os-status" name="status" required>
+                                    <select id="atualizar-os-status" name="status" required disabled>
                                         <option value="">Selecionar...</option>
                                         <option value="ABERTA">Aberta</option>
                                         <option value="EM_ANDAMENTO">Em Andamento</option>
@@ -481,7 +501,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="atualizar-os-tecnico">Técnico Responsável *</label>
-                                    <select id="atualizar-os-tecnico" name="tecnicoId" required>
+                                    <select id="atualizar-os-tecnico" name="tecnicoId" required disabled>
                                         <option value="">Selecionar...</option>
                                     </select>
                                 </div>
@@ -489,26 +509,26 @@
 
                             <div class="form-group">
                                 <label for="atualizar-os-descricao">Descrição</label>
-                                <textarea id="atualizar-os-descricao" name="descricao" rows="3" placeholder="Descrição da OS..."></textarea>
+                                <textarea id="atualizar-os-descricao" name="descricao" rows="3" placeholder="Descrição da OS..." disabled></textarea>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-os-setor">Setor</label>
-                                    <input type="text" id="atualizar-os-setor" name="setor" placeholder="Ex: Produção">
+                                    <input type="text" id="atualizar-os-setor" name="setor" placeholder="Ex: Produção" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="atualizar-os-data-conclusao">Data de Conclusão</label>
-                                    <input type="date" id="atualizar-os-data-conclusao" name="dataConclusao">
+                                    <input type="date" id="atualizar-os-data-conclusao" name="dataConclusao" disabled>
                                 </div>
                             </div>
 
                             <div class="form-row">
-                                <button type="submit" class="btn btn-primary">
-                                    <span class="icon">✅</span> Atualizar OS
+                                <button id="btn-salvar-os" type="submit" class="btn btn-primary" style="display: none;">
+                                    <span class="icon">💾</span> Salvar Alterações
                                 </button>
-                                <button type="button" class="btn btn-secondary" onclick="limparFormularioOS()">
-                                    <span class="icon">❌</span> Limpar
+                                <button id="btn-cancelar-os" type="button" class="btn btn-secondary" onclick="cancelarEdicaoOS()" style="display: none;">
+                                    <span class="icon">❌</span> Cancelar
                                 </button>
                             </div>
                         </div>

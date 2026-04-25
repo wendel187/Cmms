@@ -176,3 +176,22 @@ export async function criarOSPreventiva(dados) {
 export async function atualizarOS(ordemId, dados) {
     return await fazerRequisicao(API_ENDPOINTS.ordem(ordemId), 'PUT', dados);
 }
+
+/**
+ * Desativar/Deletar técnico
+ * @param {number} tecnicoId - ID do técnico
+ * @returns {Promise<void>}
+ */
+export async function desativarTecnico(tecnicoId) {
+    return await fazerRequisicao(API_ENDPOINTS.tecnico(tecnicoId), 'DELETE');
+}
+
+/**
+ * Cancelar/Deletar ordem de serviço
+ * @param {number} ordemId - ID da ordem
+ * @returns {Promise<void>}
+ */
+export async function cancelarOrdemServico(ordemId) {
+    return await fazerRequisicao(API_ENDPOINTS.ordem(ordemId), 'DELETE');
+}
+

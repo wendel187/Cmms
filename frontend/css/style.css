@@ -302,8 +302,53 @@ body {
     font-size: 1.1rem;
 }
 
+.btn-sm {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
 .btn .icon {
     font-size: 1.2rem;
+}
+
+.btn-sm .icon {
+    font-size: 0.95rem;
+}
+
+/* ==================== ITEM ACTIONS ==================== */
+.item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.item-actions .btn {
+    flex: 1;
+    min-width: 100px;
 }
 
 /* ==================== FEEDBACK ==================== */

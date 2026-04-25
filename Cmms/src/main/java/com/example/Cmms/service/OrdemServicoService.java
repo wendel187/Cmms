@@ -1,18 +1,29 @@
 package com.example.Cmms.service;
 
-import com.example.Cmms.domain.ordemservico.*;
-import com.example.Cmms.domain.tecnico.TecnicoRepository;
-import com.example.Cmms.exception.RecursoNaoEncontradoException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.example.Cmms.domain.ordemservico.DadosAtualizacaoOrdemServico;
+import com.example.Cmms.domain.ordemservico.DadosAtualizacaoStatusOS;
+import com.example.Cmms.domain.ordemservico.DadosCadastroOSCorretiva;
+import com.example.Cmms.domain.ordemservico.DadosCadastroOSPreventiva;
+import com.example.Cmms.domain.ordemservico.HistoricoStatus;
+import com.example.Cmms.domain.ordemservico.HistoricoStatusRepository;
+import com.example.Cmms.domain.ordemservico.OSCorretiva;
+import com.example.Cmms.domain.ordemservico.OSPreventiva;
+import com.example.Cmms.domain.ordemservico.OrdemServico;
+import com.example.Cmms.domain.ordemservico.OrdemServicoRepository;
+import com.example.Cmms.domain.ordemservico.StatusOrdemServico;
+import com.example.Cmms.domain.ordemservico.TipoOrdemServico;
+import com.example.Cmms.domain.tecnico.TecnicoRepository;
+import com.example.Cmms.exception.RecursoNaoEncontradoException;
 
 @Service
 public class OrdemServicoService {
@@ -92,6 +103,41 @@ public class OrdemServicoService {
         
         // Registrar no histórico
         historicoRepository.save(new HistoricoStatus(dados.id(), dados.novoStatus(), dados.observacoes()));
+    }
+    
+    /**
+     * Atualiza os dados de uma Ordem de Serviço
+     * @param dados DTO com os dados a atualizar
+     * @return OrdemServico atualizada
+     */
+    @Transactional
+    public OrdemServico atualizarInformacoes(DadosAtualizacaoOrdemServico dados) {
+        // Validar se a OS existe
+        var os = repository.findById(dados.id())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de Serviço não encontrada com ID: " + dados.id()));
+        
+        // Se for atualizar o técnico, validar se técnico existe e está disponível
+        if (dados.tecnicoId() != null && !dados.tecnicoId().equals(os.getTecnicoId())) {
+            var tecnico = tecnicoRepository.findById(dados.tecnicoId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Técnico não encontrado com ID: " + dados.tecnicoId()));
+            
+            if (!tecnico.podeAbrirOS()) {
+                throw new IllegalArgumentException("Técnico não está disponível. Status: " + tecnico.getStatus());
+            }
+        }
+        
+        // Armazenar status anterior para o histórico
+        StatusOrdemServico statusAnterior = os.getStatus();
+        
+        // Atualizar informações
+        os.atualizarInformacoes(dados);
+        
+        // Se o status mudou, registrar no histórico
+        if (!statusAnterior.equals(os.getStatus())) {
+            historicoRepository.save(new HistoricoStatus(dados.id(), os.getStatus(), dados.observacoes() != null ? dados.observacoes() : "Atualizado"));
+        }
+        
+        return repository.save(os);
     }
     
     public List<OrdemServico> listarOrdenadasPorPrioridade() {

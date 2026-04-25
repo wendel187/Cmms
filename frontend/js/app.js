@@ -103,8 +103,18 @@ function mudarAba(nomeAba) {
         setTimeout(() => carregarEquipamentosPage(), 100);
     } else if (nomeAba === 'ordens') {
         setTimeout(() => carregarOrdensPage(), 100);
+    } else if (nomeAba === 'atualizar-tecnico') {
+        // Carregar técnicos no select quando abrir a aba
+        setTimeout(() => carregarTecnicos(), 100);
+    } else if (nomeAba === 'atualizar-os') {
+        // Carregar ordens e técnicos nos selects quando abrir a aba
+        setTimeout(() => {
+            carregarOrdens();
+            carregarTecnicos();
+        }, 100);
     }
 }
+
 
 function mudarListagem(tipo) {
     // Remover ativo de todos
@@ -577,6 +587,7 @@ async function carregarTecnicosPage() {
                             <span>${getStatusBadge(t.status)}</span>
                         </div>
                     </div>
+                    </div>
                 </div>
             `).join('');
         }
@@ -703,6 +714,11 @@ async function carregarDadosTecnico(tecnicoId) {
         // Mostrar formulário
         document.getElementById('tecnico-form-container').style.display = 'block';
         document.getElementById('atualizar-tecnico-feedback').textContent = '';
+        
+        // Resetar estado dos botões (mostrar Editar, esconder Salvar/Cancelar)
+        document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
+        document.getElementById('btn-salvar-tecnico').style.display = 'none';
+        document.getElementById('btn-cancelar-tecnico').style.display = 'none';
     } catch (error) {
         document.getElementById('tecnico-form-container').style.display = 'none';
         mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro ao carregar técnico: ${error.message}`, 'error');
@@ -741,7 +757,10 @@ async function atualizarTecnico(e) {
             mostrarFeedback(feedback, `✅ Técnico ${dados.nome} atualizado com sucesso!`, 'success');
             mostrarToast(`✅ Técnico atualizado!`, 'success');
             carregarTecnicos();
-            setTimeout(() => limparFormularioTecnico(), 1500);
+            setTimeout(() => {
+                limparFormularioTecnico();
+                cancelarEdicaoTecnico();
+            }, 1500);
         } else {
             const erro = await response.text();
             mostrarFeedback(feedback, `❌ Erro ao atualizar: ${erro}`, 'error');
@@ -757,6 +776,11 @@ function limparFormularioTecnico() {
     document.getElementById('tecnico-form-container').style.display = 'none';
     document.getElementById('atualizar-tecnico-feedback').textContent = '';
     document.getElementById('atualizar-tecnico-feedback').classList.remove('show');
+    
+    // Resetar botões de edição
+    document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
+    document.getElementById('btn-salvar-tecnico').style.display = 'none';
+    document.getElementById('btn-cancelar-tecnico').style.display = 'none';
 }
 
 // ==================== ATUALIZAR ORDEM DE SERVIÇO ====================
@@ -782,15 +806,21 @@ async function carregarDadosOS(osId) {
         document.getElementById('atualizar-os-setor').value = os.setor || '';
         document.getElementById('atualizar-os-data-conclusao').value = os.dataConclusao ? os.dataConclusao.split('T')[0] : '';
         
-        // Tornar campos não editáveis read-only
+        // Desabilitar campos por padrão
+        document.getElementById('atualizar-os-status').disabled = true;
         document.getElementById('atualizar-os-tecnico').disabled = true;
-        document.getElementById('atualizar-os-descricao').readOnly = true;
-        document.getElementById('atualizar-os-setor').readOnly = true;
-        document.getElementById('atualizar-os-data-conclusao').readOnly = true;
+        document.getElementById('atualizar-os-descricao').disabled = true;
+        document.getElementById('atualizar-os-setor').disabled = true;
+        document.getElementById('atualizar-os-data-conclusao').disabled = true;
         
         // Mostrar formulário
         document.getElementById('os-form-container').style.display = 'block';
         document.getElementById('atualizar-os-feedback').textContent = '';
+        
+        // Resetar estado dos botões (mostrar Editar, esconder Salvar/Cancelar)
+        document.getElementById('btn-editar-os').style.display = 'inline-block';
+        document.getElementById('btn-salvar-os').style.display = 'none';
+        document.getElementById('btn-cancelar-os').style.display = 'none';
     } catch (error) {
         document.getElementById('os-form-container').style.display = 'none';
         mostrarFeedback(document.getElementById('atualizar-os-feedback'), `❌ Erro ao carregar OS: ${error.message}`, 'error');
@@ -825,7 +855,10 @@ async function atualizarOS(e) {
             mostrarFeedback(feedback, `✅ Status da Ordem de Serviço #${osId} atualizado com sucesso!`, 'success');
             mostrarToast(`✅ OS #${osId} atualizada!`, 'success');
             carregarOrdens();
-            setTimeout(() => limparFormularioOS(), 1500);
+            setTimeout(() => {
+                limparFormularioOS();
+                cancelarEdicaoOS();
+            }, 1500);
         } else {
             const erro = await response.text();
             mostrarFeedback(feedback, `❌ Erro ao atualizar: ${erro}`, 'error');
@@ -842,9 +875,265 @@ function limparFormularioOS() {
     document.getElementById('atualizar-os-feedback').textContent = '';
     document.getElementById('atualizar-os-feedback').classList.remove('show');
     
-    // Re-enable fields
-    document.getElementById('atualizar-os-tecnico').disabled = false;
-    document.getElementById('atualizar-os-descricao').readOnly = false;
-    document.getElementById('atualizar-os-setor').readOnly = false;
-    document.getElementById('atualizar-os-data-conclusao').readOnly = false;
+    // Resetar botões de edição
+    document.getElementById('btn-editar-os').style.display = 'inline-block';
+    document.getElementById('btn-salvar-os').style.display = 'none';
+    document.getElementById('btn-cancelar-os').style.display = 'none';
 }
+
+// ==================== FUNÇÕES GLOBAIS PARA BOTÕES DE EDITAR ====================
+
+/**
+ * Abrir formulário para editar técnico
+ * @param {number} tecnicoId - ID do técnico
+ */
+function abrirEditarTecnico(tecnicoId) {
+    // Navegar para a aba de atualizar técnico
+    mudarAba('atualizar-tecnico');
+    
+    // Selecionar o técnico no dropdown
+    const selectTecnico = document.getElementById('atualizar-tecnico-id');
+    if (selectTecnico) {
+        selectTecnico.value = tecnicoId;
+        // Disparar o event de change para carregar os dados
+        const event = new Event('change');
+        selectTecnico.dispatchEvent(event);
+    }
+}
+
+/**
+ * Abrir formulário para deletar técnico
+ * @param {number} tecnicoId - ID do técnico
+ */
+function abrirDeletarTecnico(tecnicoId) {
+    const confirmacao = confirm('⚠️ Desativar este técnico? Essa ação não pode ser desfeita.');
+    
+    if (!confirmacao) {
+        mostrarToast('❌ Operação cancelada', 'info');
+        return;
+    }
+
+    deletarTecnicoConfirmado(tecnicoId);
+}
+
+/**
+ * Deletar técnico confirmado
+ * @param {number} tecnicoId - ID do técnico
+ */
+async function deletarTecnicoConfirmado(tecnicoId) {
+    try {
+        mostrarToast('🗑️ Desativando técnico...', 'info');
+        
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico/${tecnicoId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            mostrarToast('✅ Técnico desativado com sucesso!', 'success');
+            carregarTecnicos();
+            carregarTecnicosPage();
+        } else {
+            const erro = await response.text();
+            mostrarToast(`❌ Erro ao desativar técnico: ${erro}`, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao desativar técnico:', error);
+        mostrarToast('❌ Erro ao desativar técnico', 'error');
+    }
+}
+
+/**
+ * Abrir formulário para editar ordem de serviço
+ * @param {number} osId - ID da ordem
+ */
+function abrirEditarOS(osId) {
+    // Navegar para a aba de atualizar OS
+    mudarAba('atualizar-os');
+    
+    // Selecionar a OS no dropdown
+    const selectOS = document.getElementById('atualizar-os-id');
+    if (selectOS) {
+        selectOS.value = osId;
+        // Disparar o event de change para carregar os dados
+        const event = new Event('change');
+        selectOS.dispatchEvent(event);
+    }
+}
+
+/**
+ * Abrir confirmação para deletar ordem de serviço
+ * @param {number} osId - ID da ordem
+ */
+function abrirDeletarOS(osId) {
+    const confirmacao = confirm('⚠️ Cancelar esta ordem de serviço? Essa ação não pode ser desfeita.');
+    
+    if (!confirmacao) {
+        mostrarToast('❌ Operação cancelada', 'info');
+        return;
+    }
+
+    deletarOSConfirmada(osId);
+}
+
+/**
+ * Deletar ordem de serviço confirmada
+ * @param {number} osId - ID da ordem
+ */
+async function deletarOSConfirmada(osId) {
+    try {
+        mostrarToast('🗑️ Cancelando ordem...', 'info');
+        
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/${osId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            mostrarToast('✅ Ordem cancelada com sucesso!', 'success');
+            carregarOrdens();
+            carregarOrdensPage();
+        } else {
+            const erro = await response.text();
+            mostrarToast(`❌ Erro ao cancelar ordem: ${erro}`, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao cancelar ordem:', error);
+        mostrarToast('❌ Erro ao cancelar ordem', 'error');
+    }
+}
+
+/**
+ * Deletar técnico selecionado no dropdown da aba "Atualizar Técnico"
+ */
+function deletarTecnicoSelecionado() {
+    const tecnicoId = document.getElementById('atualizar-tecnico-id').value;
+    
+    if (!tecnicoId) {
+        mostrarToast('❌ Selecione um técnico primeiro!', 'error');
+        return;
+    }
+    
+    // Chamar a função existente que já trata a confirmação e deleção
+    abrirDeletarTecnico(tecnicoId);
+}
+
+/**
+ * Deletar ordem de serviço selecionada no dropdown da aba "Atualizar OS"
+ */
+function deletarOSSelecionada() {
+    const osId = document.getElementById('atualizar-os-id').value;
+    
+    if (!osId) {
+        mostrarToast('❌ Selecione uma ordem de serviço primeiro!', 'error');
+        return;
+    }
+    
+    // Chamar a função existente que já trata a confirmação e deleção
+    abrirDeletarOS(osId);
+}
+
+/**
+ * Ativar modo de edição para técnico
+ */
+function ativarEdicaoTecnico() {
+    // Habilitar campos
+    document.getElementById('atualizar-tecnico-nome').disabled = false;
+    document.getElementById('atualizar-tecnico-email').disabled = false;
+    document.getElementById('atualizar-tecnico-telefone').disabled = false;
+    document.getElementById('atualizar-tecnico-especialidade').disabled = false;
+    document.getElementById('atualizar-tecnico-setor').disabled = false;
+    document.getElementById('atualizar-tecnico-status').disabled = false;
+    
+    // Mostrar botões de salvar/cancelar
+    document.getElementById('btn-salvar-tecnico').style.display = 'inline-block';
+    document.getElementById('btn-cancelar-tecnico').style.display = 'inline-block';
+    
+    // Esconder botão de editar
+    document.getElementById('btn-editar-tecnico').style.display = 'none';
+    
+    mostrarToast('✏️ Modo edição ativado', 'info');
+}
+
+/**
+ * Cancelar modo de edição para técnico
+ */
+function cancelarEdicaoTecnico() {
+    // Desabilitar campos
+    document.getElementById('atualizar-tecnico-nome').disabled = true;
+    document.getElementById('atualizar-tecnico-email').disabled = true;
+    document.getElementById('atualizar-tecnico-telefone').disabled = true;
+    document.getElementById('atualizar-tecnico-especialidade').disabled = true;
+    document.getElementById('atualizar-tecnico-setor').disabled = true;
+    document.getElementById('atualizar-tecnico-status').disabled = true;
+    
+    // Esconder botões de salvar/cancelar
+    document.getElementById('btn-salvar-tecnico').style.display = 'none';
+    document.getElementById('btn-cancelar-tecnico').style.display = 'none';
+    
+    // Mostrar botão de editar
+    document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
+    
+    mostrarToast('❌ Edição cancelada', 'info');
+}
+
+/**
+ * Ativar modo de edição para ordem de serviço
+ */
+function ativarEdicaoOS() {
+    // Habilitar campos
+    document.getElementById('atualizar-os-status').disabled = false;
+    document.getElementById('atualizar-os-tecnico').disabled = false;
+    document.getElementById('atualizar-os-descricao').disabled = false;
+    document.getElementById('atualizar-os-setor').disabled = false;
+    document.getElementById('atualizar-os-data-conclusao').disabled = false;
+    
+    // Mostrar botões de salvar/cancelar
+    document.getElementById('btn-salvar-os').style.display = 'inline-block';
+    document.getElementById('btn-cancelar-os').style.display = 'inline-block';
+    
+    // Esconder botão de editar
+    document.getElementById('btn-editar-os').style.display = 'none';
+    
+    mostrarToast('✏️ Modo edição ativado', 'info');
+}
+
+/**
+ * Cancelar modo de edição para ordem de serviço
+ */
+function cancelarEdicaoOS() {
+    // Desabilitar campos
+    document.getElementById('atualizar-os-status').disabled = true;
+    document.getElementById('atualizar-os-tecnico').disabled = true;
+    document.getElementById('atualizar-os-descricao').disabled = true;
+    document.getElementById('atualizar-os-setor').disabled = true;
+    document.getElementById('atualizar-os-data-conclusao').disabled = true;
+    
+    // Esconder botões de salvar/cancelar
+    document.getElementById('btn-salvar-os').style.display = 'none';
+    document.getElementById('btn-cancelar-os').style.display = 'none';
+    
+    // Mostrar botão de editar
+    document.getElementById('btn-editar-os').style.display = 'inline-block';
+    
+    mostrarToast('❌ Edição cancelada', 'info');
+}
+
+// ==================== EXPORTAR FUNÇÕES GLOBAIS ====================
+// Tornar funções acessíveis do HTML (onclick, etc)
+window.ativarEdicaoTecnico = ativarEdicaoTecnico;
+window.cancelarEdicaoTecnico = cancelarEdicaoTecnico;
+window.ativarEdicaoOS = ativarEdicaoOS;
+window.cancelarEdicaoOS = cancelarEdicaoOS;
+window.deletarTecnicoSelecionado = deletarTecnicoSelecionado;
+window.deletarOSSelecionada = deletarOSSelecionada;
+window.carregarDadosTecnico = carregarDadosTecnico;
+window.carregarDadosOS = carregarDadosOS;
+window.limparFormularioTecnico = limparFormularioTecnico;
+window.limparFormularioOS = limparFormularioOS;
+window.atualizarTecnico = atualizarTecnico;
+window.atualizarOS = atualizarOS;
+window.mostrarToast = mostrarToast;
+window.recarregarTecnicos = recarregarTecnicos;
+window.recarregarEquipamentos = recarregarEquipamentos;
+window.recarregarOrdens = recarregarOrdens;

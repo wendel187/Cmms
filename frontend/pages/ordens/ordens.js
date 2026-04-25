@@ -1,6 +1,6 @@
 // ==================== ORDENS PAGE ====================
 
-import { carregarOrdensAbertas, carregarOrdem, atualizarOS } from '../../js/api.js';
+import { carregarOrdensAbertas, carregarOrdem, atualizarOS, cancelarOrdemServico } from '../../js/api.js';
 import { mostrarToast } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
@@ -85,14 +85,6 @@ function renderizarOrdens(ordens) {
                         <span class="item-detail-label">Data Abertura:</span>
                         <span>${o.dataAbertura ? formatarData(o.dataAbertura) : 'N/A'}</span>
                     </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-secondary btn-sm" onclick="editarOrdem(${o.id})">
-                        <span class="icon">✏️</span> Editar
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="deletarOrdem(${o.id})">
-                        <span class="icon">🗑️</span> Deletar
-                    </button>
                 </div>
             </div>
         `).join('');
@@ -199,12 +191,26 @@ async function salvarOrdem(id, nomesCampos) {
 }
 
 /**
- * Deletar ordem (stub - implementar no futuro)
+ * Deletar/Cancelar ordem de serviço
+ * @param {number} id - ID da ordem
  */
-function deletarOrdem(id) {
-    if (confirm('Tem certeza que deseja deletar esta ordem?')) {
-        mostrarToast(`Deletar ordem ${id}`, 'info');
-        // TODO: Implementar deleção
+async function deletarOrdem(id) {
+    const confirmacao = confirm('⚠️ Cancelar esta ordem de serviço? Essa ação não pode ser desfeita.');
+    
+    if (!confirmacao) {
+        mostrarToast('❌ Operação cancelada', 'info');
+        return;
+    }
+
+    try {
+        mostrarToast('🗑️ Cancelando ordem...', 'info');
+        
+        await cancelarOrdemServico(id);
+        mostrarToast('✅ Ordem cancelada com sucesso!', 'success');
+        await recarregarOrdens();
+    } catch (error) {
+        console.error('Erro ao cancelar ordem:', error);
+        mostrarToast('❌ Erro ao cancelar ordem', 'error');
     }
 }
 

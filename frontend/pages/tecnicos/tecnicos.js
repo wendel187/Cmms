@@ -1,6 +1,6 @@
 // ==================== TÉCNICOS PAGE ====================
 
-import { carregarTecnicos, carregarTecnico, atualizarTecnico } from '../../js/api.js';
+import { carregarTecnicos, carregarTecnico, atualizarTecnico, desativarTecnico } from '../../js/api.js';
 import { mostrarToast } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
@@ -57,14 +57,6 @@ async function carregarTecnicosPage() {
                             <span class="item-detail-label">Status:</span>
                             <span class="status-badge ${t.status?.toLowerCase().replace('_', '-')}">${t.status}</span>
                         </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editarTecnico(${t.id})">
-                            <span class="icon">✏️</span> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deletarTecnico(${t.id})">
-                            <span class="icon">🗑️</span> Deletar
-                        </button>
                     </div>
                 </div>
             `).join('');
@@ -153,12 +145,26 @@ async function salvarTecnico(id, nomesCampos) {
 }
 
 /**
- * Deletar técnico (stub - implementar no futuro)
+ * Deletar/Desativar técnico
+ * @param {number} id - ID do técnico
  */
-function deletarTecnico(id) {
-    if (confirm('Tem certeza que deseja deletar este técnico?')) {
-        mostrarToast(`Deletar técnico ${id}`, 'info');
-        // TODO: Implementar deleção
+async function deletarTecnico(id) {
+    const confirmacao = confirm('⚠️ Desativar este técnico? Essa ação não pode ser desfeita.');
+    
+    if (!confirmacao) {
+        mostrarToast('❌ Operação cancelada', 'info');
+        return;
+    }
+
+    try {
+        mostrarToast('🗑️ Desativando técnico...', 'info');
+        
+        await desativarTecnico(id);
+        mostrarToast('✅ Técnico desativado com sucesso!', 'success');
+        await recarregarTecnicos();
+    } catch (error) {
+        console.error('Erro ao desativar técnico:', error);
+        mostrarToast('❌ Erro ao desativar técnico', 'error');
     }
 }
 

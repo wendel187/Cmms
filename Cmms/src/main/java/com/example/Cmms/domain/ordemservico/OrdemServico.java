@@ -1,13 +1,25 @@
 package com.example.Cmms.domain.ordemservico;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity(name = "OrdenServiço")
 @Table(name = "ordens_servico")
@@ -51,6 +63,22 @@ public abstract class OrdemServico {
         this.status = novoStatus;
         if (novoStatus == StatusOrdemServico.CONCLUIDA) {
             this.dataConclusao = LocalDateTime.now();
+        }
+    }
+    
+    /**
+     * Atualiza os campos da Ordem de Serviço
+     * @param dados DTO com os novos dados
+     */
+    public void atualizarInformacoes(DadosAtualizacaoOrdemServico dados) {
+        if (dados.descricao() != null) {
+            this.descricao = dados.descricao();
+        }
+        if (dados.status() != null) {
+            this.atualizarStatus(dados.status());
+        }
+        if (dados.tecnicoId() != null) {
+            this.tecnicoId = dados.tecnicoId();
         }
     }
 }
