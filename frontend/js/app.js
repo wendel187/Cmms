@@ -1,10 +1,26 @@
 // ==================== CONFIGURAÇÃO ====================
-const API_BASE_URL = 'http://localhost:8080';
+import { API_BASE_URL, API_ENDPOINTS } from './config.js';
+import { inicializarTecnicos } from '../pages/tecnicos/tecnicos.js';
+import { inicializarEquipamentos } from '../pages/equipamentos/equipamentos.js';
+import { inicializarOrdens } from '../pages/ordens/ordens.js';
+import { mostrarModal, fecharModal } from './modal.js';
+
+// Para compatibilidade com código existente
+const API_CONFIG = {
+    BASE_URL: API_BASE_URL,
+    ENDPOINTS: API_ENDPOINTS
+};
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
     verificarConexao();
     inicializarEventos();
+    
+    // Inicializar módulos de páginas
+    inicializarTecnicos();
+    inicializarEquipamentos();
+    inicializarOrdens();
+    
     carregarTecnicos();
     carregarEquipamentos();
     carregarOrdens();
@@ -13,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== VERIFICAR CONEXÃO ====================
 async function verificarConexao() {
     try {
-        const response = await fetch(`${API_BASE_URL}/actuator/health`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/actuator/health`, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         });
@@ -59,13 +75,16 @@ function inicializarEventos() {
     document.getElementById('form-atualizar-tecnico').addEventListener('submit', atualizarTecnico);
     document.getElementById('form-atualizar-os').addEventListener('submit', atualizarOS);
 
-    // Fechar modal ao clicar fora
+    // Fechar modal ao clicar fora (no fundo escuro)
     const modalOS = document.getElementById('modal-os');
-    modalOS.addEventListener('click', (e) => {
-        if (e.target.id === 'modal-os') {
-            fecharModalOS();
-        }
-    });
+    if (modalOS) {
+        modalOS.addEventListener('click', (e) => {
+            // Se clicou no fundo (modal), fechar
+            if (e.target === modalOS) {
+                fecharModalOS();
+            }
+        });
+    }
 
     // Fechar modal ao pressionar ESC
     document.addEventListener('keydown', (e) => {
@@ -143,7 +162,7 @@ async function cadastrarTecnico(e) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/tecnico`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -180,7 +199,7 @@ async function cadastrarEquipamento(e) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/equipamento`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -207,6 +226,7 @@ async function criarOSCorretiva(e) {
     e.preventDefault();
     
     const form = e.target;
+    const falhaCheckbox = document.getElementById('corr-falha-total');
     const dados = {
         equipamentoId: parseInt(document.getElementById('corr-equipamento').value),
         tecnicoId: parseInt(document.getElementById('corr-tecnico').value),
@@ -214,11 +234,11 @@ async function criarOSCorretiva(e) {
         descricaoFalha: document.getElementById('corr-falha').value,
         setor: document.getElementById('corr-setor').value,
         nivelCriticidade: parseInt(document.getElementById('corr-criticidade').value),
-        falhaTotal: document.getElementById('corr-falha-total').checked
+        falhaTotal: falhaCheckbox ? falhaCheckbox.checked : false
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/corretiva`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/corretiva`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -258,7 +278,7 @@ async function criarOSPreventiva(e) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/preventiva`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/preventiva`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -285,7 +305,7 @@ async function criarOSPreventiva(e) {
 // ==================== CARREGAR TÉCNICOS ====================
 async function carregarTecnicos() {
     try {
-        const response = await fetch(`${API_BASE_URL}/tecnico?page=0&size=100`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico?page=0&size=100`);
         const data = await response.json();
         const tecnicos = data.content || [];
 
@@ -338,7 +358,7 @@ async function carregarTecnicos() {
 // ==================== CARREGAR EQUIPAMENTOS ====================
 async function carregarEquipamentos() {
     try {
-        const response = await fetch(`${API_BASE_URL}/equipamento?page=0&size=100`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento?page=0&size=100`);
         const data = await response.json();
         const equipamentos = data.content || [];
 
@@ -383,7 +403,7 @@ async function carregarEquipamentos() {
 // ==================== CARREGAR ORDENS ====================
 async function carregarOrdens() {
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/abertas`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/abertas`);
         const ordens = await response.json();
 
         // Atualizar select de atualização de OS
@@ -433,8 +453,10 @@ function atualizarSelectTecnicos(tecnicos) {
     selects.forEach(id => {
         const select = document.getElementById(id);
         if (select) {
+            const currentValue = select.value;
             const html = tecnicos.map(t => `<option value="${t.id}">${t.nome} - ${t.especialidade}</option>`).join('');
             select.innerHTML = '<option value="">Selecionar...</option>' + html;
+            select.value = currentValue; // Restore selected value
         }
     });
 }
@@ -538,7 +560,7 @@ function recarregarOrdens() {
 // ==================== CARREGAR PÁGINAS SEPARADAS ====================
 async function carregarTecnicosPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/tecnico?page=0&size=100`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico?page=0&size=100`);
         const data = await response.json();
         const tecnicos = data.content || [];
 
@@ -587,7 +609,7 @@ async function carregarTecnicosPage() {
 
 async function carregarEquipamentosPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/equipamento?page=0&size=100`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento?page=0&size=100`);
         const data = await response.json();
         const equipamentos = data.content || [];
 
@@ -632,7 +654,7 @@ async function carregarEquipamentosPage() {
 
 async function carregarOrdensPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/abertas`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/abertas`);
         const ordens = await response.json();
 
         const listEl = document.getElementById('ordens-list-page');
@@ -685,7 +707,7 @@ async function abrirModalOS(osId) {
         body.innerHTML = `<div style="text-align: center; padding: 40px;"><p>⏳ Carregando dados da OS...</p></div>`;
         modal.classList.add('show');
         
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/${osId}`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/${osId}`, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         });
@@ -778,11 +800,24 @@ async function abrirModalOS(osId) {
 
 function fecharModalOS() {
     const modal = document.getElementById('modal-os');
-    modal.classList.remove('show');
-    
-    // Limpar conteúdo
-    document.getElementById('modal-os-title').textContent = 'Detalhes da Ordem de Serviço';
-    document.getElementById('modal-os-body').innerHTML = '';
+    if (modal) {
+        modal.classList.remove('show');
+        
+        // Limpar conteúdo
+        const title = document.getElementById('modal-os-title');
+        const body = document.getElementById('modal-os-body');
+        
+        if (title) title.textContent = 'Detalhes da Ordem de Serviço';
+        if (body) body.innerHTML = '';
+        
+        // Garantir que o modal fica invisível
+        modal.style.display = 'none';
+        setTimeout(() => {
+            if (!modal.classList.contains('show')) {
+                modal.style.display = 'none';
+            }
+        }, 100);
+    }
 }
 
 
@@ -791,28 +826,32 @@ function fecharModalOS() {
 async function carregarDadosTecnico(tecnicoId) {
     if (!tecnicoId) {
         document.getElementById('tecnico-form-container').style.display = 'none';
+        document.getElementById('atualizar-tecnico-feedback').textContent = '';
         return;
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/tecnico/${tecnicoId}`);
-        if (!response.ok) throw new Error('Técnico não encontrado');
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico/${tecnicoId}`);
+        if (!response.ok) {
+            throw new Error('Técnico não encontrado');
+        }
 
         const tecnico = await response.json();
         
         // Preencher formulário
-        document.getElementById('atualizar-tecnico-nome').value = tecnico.nome;
-        document.getElementById('atualizar-tecnico-email').value = tecnico.email;
-        document.getElementById('atualizar-tecnico-telefone').value = tecnico.telefone;
-        document.getElementById('atualizar-tecnico-especialidade').value = tecnico.especialidade;
-        document.getElementById('atualizar-tecnico-setor').value = tecnico.setor;
-        document.getElementById('atualizar-tecnico-status').value = tecnico.status;
+        document.getElementById('atualizar-tecnico-nome').value = tecnico.nome || '';
+        document.getElementById('atualizar-tecnico-email').value = tecnico.email || '';
+        document.getElementById('atualizar-tecnico-telefone').value = tecnico.telefone || '';
+        document.getElementById('atualizar-tecnico-especialidade').value = tecnico.especialidade || '';
+        document.getElementById('atualizar-tecnico-setor').value = tecnico.setor || '';
+        document.getElementById('atualizar-tecnico-status').value = tecnico.status || '';
         
         // Mostrar formulário
         document.getElementById('tecnico-form-container').style.display = 'block';
+        document.getElementById('atualizar-tecnico-feedback').textContent = '';
     } catch (error) {
-        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro: ${error.message}`, 'error');
         document.getElementById('tecnico-form-container').style.display = 'none';
+        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro ao carregar técnico: ${error.message}`, 'error');
     }
 }
 
@@ -820,7 +859,13 @@ async function atualizarTecnico(e) {
     e.preventDefault();
 
     const tecnicoId = document.getElementById('atualizar-tecnico-id').value;
+    if (!tecnicoId) {
+        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Selecione um técnico primeiro!`, 'error');
+        return;
+    }
+
     const dados = {
+        id: parseInt(tecnicoId),
         nome: document.getElementById('atualizar-tecnico-nome').value,
         email: document.getElementById('atualizar-tecnico-email').value,
         telefone: document.getElementById('atualizar-tecnico-telefone').value,
@@ -830,7 +875,7 @@ async function atualizarTecnico(e) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/tecnico/${tecnicoId}`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico/${tecnicoId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -840,12 +885,12 @@ async function atualizarTecnico(e) {
         
         if (response.ok) {
             mostrarFeedback(feedback, `✅ Técnico ${dados.nome} atualizado com sucesso!`, 'success');
-            mostrarToast(`✅ Técnico atualizado com sucesso!`, 'success');
+            mostrarToast(`✅ Técnico atualizado!`, 'success');
             carregarTecnicos();
-            limparFormularioTecnico();
+            setTimeout(() => limparFormularioTecnico(), 1500);
         } else {
             const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
+            mostrarFeedback(feedback, `❌ Erro ao atualizar: ${erro}`, 'error');
         }
     } catch (error) {
         mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro: ${error.message}`, 'error');
@@ -854,7 +899,9 @@ async function atualizarTecnico(e) {
 
 function limparFormularioTecnico() {
     document.getElementById('form-atualizar-tecnico').reset();
+    document.getElementById('atualizar-tecnico-id').value = '';
     document.getElementById('tecnico-form-container').style.display = 'none';
+    document.getElementById('atualizar-tecnico-feedback').textContent = '';
     document.getElementById('atualizar-tecnico-feedback').classList.remove('show');
 }
 
@@ -862,27 +909,37 @@ function limparFormularioTecnico() {
 async function carregarDadosOS(osId) {
     if (!osId) {
         document.getElementById('os-form-container').style.display = 'none';
+        document.getElementById('atualizar-os-feedback').textContent = '';
         return;
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/${osId}`);
-        if (!response.ok) throw new Error('OS não encontrada');
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/${osId}`);
+        if (!response.ok) {
+            throw new Error('OS não encontrada');
+        }
 
         const os = await response.json();
         
-        // Preencher formulário
-        document.getElementById('atualizar-os-status').value = os.status;
-        document.getElementById('atualizar-os-tecnico').value = os.tecnico?.id || '';
+        // Preencher formulário - apenas status é editável
+        document.getElementById('atualizar-os-status').value = os.status || '';
+        document.getElementById('atualizar-os-tecnico').value = os.tecnico?.id || os.tecnicoId || '';
         document.getElementById('atualizar-os-descricao').value = os.descricao || '';
         document.getElementById('atualizar-os-setor').value = os.setor || '';
         document.getElementById('atualizar-os-data-conclusao').value = os.dataConclusao ? os.dataConclusao.split('T')[0] : '';
         
+        // Tornar campos não editáveis read-only
+        document.getElementById('atualizar-os-tecnico').disabled = true;
+        document.getElementById('atualizar-os-descricao').readOnly = true;
+        document.getElementById('atualizar-os-setor').readOnly = true;
+        document.getElementById('atualizar-os-data-conclusao').readOnly = true;
+        
         // Mostrar formulário
         document.getElementById('os-form-container').style.display = 'block';
+        document.getElementById('atualizar-os-feedback').textContent = '';
     } catch (error) {
-        mostrarFeedback(document.getElementById('atualizar-os-feedback'), `❌ Erro: ${error.message}`, 'error');
         document.getElementById('os-form-container').style.display = 'none';
+        mostrarFeedback(document.getElementById('atualizar-os-feedback'), `❌ Erro ao carregar OS: ${error.message}`, 'error');
     }
 }
 
@@ -890,16 +947,19 @@ async function atualizarOS(e) {
     e.preventDefault();
 
     const osId = document.getElementById('atualizar-os-id').value;
+    if (!osId) {
+        mostrarFeedback(document.getElementById('atualizar-os-feedback'), `❌ Selecione uma OS primeiro!`, 'error');
+        return;
+    }
+
     const dados = {
-        status: document.getElementById('atualizar-os-status').value,
-        tecnicoId: parseInt(document.getElementById('atualizar-os-tecnico').value) || null,
-        descricao: document.getElementById('atualizar-os-descricao').value,
-        setor: document.getElementById('atualizar-os-setor').value,
-        dataConclusao: document.getElementById('atualizar-os-data-conclusao').value || null
+        id: parseInt(osId),
+        novoStatus: document.getElementById('atualizar-os-status').value,
+        observacoes: document.getElementById('atualizar-os-descricao').value // using descricao as observacoes
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/ordens-servico/${osId}`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
@@ -908,13 +968,13 @@ async function atualizarOS(e) {
         const feedback = document.getElementById('atualizar-os-feedback');
         
         if (response.ok) {
-            mostrarFeedback(feedback, `✅ Ordem de Serviço #${osId} atualizada com sucesso!`, 'success');
-            mostrarToast(`✅ OS #${osId} atualizada com sucesso!`, 'success');
+            mostrarFeedback(feedback, `✅ Status da Ordem de Serviço #${osId} atualizado com sucesso!`, 'success');
+            mostrarToast(`✅ OS #${osId} atualizada!`, 'success');
             carregarOrdens();
-            limparFormularioOS();
+            setTimeout(() => limparFormularioOS(), 1500);
         } else {
             const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
+            mostrarFeedback(feedback, `❌ Erro ao atualizar: ${erro}`, 'error');
         }
     } catch (error) {
         mostrarFeedback(document.getElementById('atualizar-os-feedback'), `❌ Erro: ${error.message}`, 'error');
@@ -923,6 +983,14 @@ async function atualizarOS(e) {
 
 function limparFormularioOS() {
     document.getElementById('form-atualizar-os').reset();
+    document.getElementById('atualizar-os-id').value = '';
     document.getElementById('os-form-container').style.display = 'none';
+    document.getElementById('atualizar-os-feedback').textContent = '';
     document.getElementById('atualizar-os-feedback').classList.remove('show');
+    
+    // Re-enable fields
+    document.getElementById('atualizar-os-tecnico').disabled = false;
+    document.getElementById('atualizar-os-descricao').readOnly = false;
+    document.getElementById('atualizar-os-setor').readOnly = false;
+    document.getElementById('atualizar-os-data-conclusao').readOnly = false;
 }

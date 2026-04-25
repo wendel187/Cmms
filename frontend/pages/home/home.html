@@ -1,0 +1,114 @@
+<!-- HOME - Seção de Cadastros -->
+<section id="home-tab" class="tab-content active">
+    <div class="section-grid">
+        <!-- Cadastro de Técnico -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>👨‍🔧 Cadastrar Técnico</h2>
+                <p class="section-subtitle">Adicionar novo técnico ao sistema</p>
+            </div>
+            <form id="form-tecnico" class="form">
+                <div class="form-group">
+                    <label for="tecnico-nome">Nome *</label>
+                    <input type="text" id="tecnico-nome" name="nome" required placeholder="Ex: João Silva">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tecnico-email">Email *</label>
+                        <input type="email" id="tecnico-email" name="email" required placeholder="joao@cmms.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="tecnico-telefone">Telefone *</label>
+                        <input type="tel" id="tecnico-telefone" name="telefone" required placeholder="11 98765-4321">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tecnico-especialidade">Especialidade *</label>
+                        <input type="text" id="tecnico-especialidade" name="especialidade" required placeholder="Ex: Eletrônica">
+                    </div>
+                    <div class="form-group">
+                        <label for="tecnico-setor">Setor *</label>
+                        <input type="text" id="tecnico-setor" name="setor" required placeholder="Ex: Produção">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tecnico-status">Status *</label>
+                    <select id="tecnico-status" name="status" required>
+                        <option value="">Selecionar...</option>
+                        <option value="DISPONIVEL">Disponível</option>
+                        <option value="EM_PAUSA">Em Pausa</option>
+                        <option value="INDISPONIVEL">Indisponível</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="icon">➕</span> Cadastrar Técnico
+                </button>
+            </form>
+            <div id="tecnico-feedback" class="feedback"></div>
+        </div>
+
+        <!-- Cadastro de Equipamento -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🔧 Cadastrar Equipamento</h2>
+                <p class="section-subtitle">Adicionar novo equipamento ao sistema</p>
+            </div>
+            <form id="form-equipamento" class="form">
+                <div class="form-group">
+                    <label for="equipamento-nome">Nome do Equipamento *</label>
+                    <input type="text" id="equipamento-nome" name="nome" required placeholder="Ex: Compressor A-200">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="equipamento-codigo">Código *</label>
+                        <input type="text" id="equipamento-codigo" name="codigo" required placeholder="Ex: COMP-A200">
+                    </div>
+                    <div class="form-group">
+                        <label for="equipamento-setor">Setor *</label>
+                        <input type="text" id="equipamento-setor" name="setor" required placeholder="Ex: Produção">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="equipamento-status">Status *</label>
+                        <select id="equipamento-status" name="status" required>
+                            <option value="">Selecionar...</option>
+                            <option value="OPERACIONAL">Operacional</option>
+                            <option value="DEFEITO">Defeito</option>
+                            <option value="MANUTENCAO">Manutenção</option>
+                            <option value="DESATIVADO">Desativado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipamento-criticidade">Criticidade *</label>
+                        <select id="equipamento-criticidade" name="criticidade" required>
+                            <option value="">Selecionar...</option>
+                            <option value="CRITICA">Crítica</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="MEDIA">Média</option>
+                            <option value="BAIXA">Baixa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="equipamento-ultima-manutencao">Última Manutenção *</label>
+                    <input type="date" id="equipamento-ultima-manutencao" name="ultimaManutencao" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="icon">➕</span> Cadastrar Equipamento
+                </button>
+            </form>
+            <div id="equipamento-feedback" class="feedback"></div>
+        </div>
+    </div>
+</section>
+

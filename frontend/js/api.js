@@ -121,6 +121,15 @@ export async function criarEquipamento(dados) {
     return await fazerRequisicao(API_ENDPOINTS.equipamentos, 'POST', dados);
 }
 
+/**
+ * Atualizar equipamento
+ * @param {Object} dados - Dados a atualizar (deve incluir 'id')
+ * @returns {Promise<Object>}
+ */
+export async function atualizarEquipamento(dados) {
+    return await fazerRequisicao(API_ENDPOINTS.equipamentos, 'PUT', dados);
+}
+
 // ==================== ORDENS DE SERVIÇO ====================
 
 /**

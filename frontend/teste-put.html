@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste PUT - CMMS</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            margin: 5px;
+            padding: 10px 20px;
+        }
+        .test-info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-left: 4px solid #0c5460;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status-ok { color: #27ae60; font-weight: bold; }
+        .status-error { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>🧪 Teste de Funcionalidade PUT</h1>
+                <p>Validação dos sistemas de edição (PUT) do CMMS</p>
+            </div>
+        </header>
+
+        <div class="test-section">
+            <h2>📋 Status da Implementação</h2>
+            <div class="test-info">
+                <p><span class="status-ok">✅</span> Sistema de Modais implementado</p>
+                <p><span class="status-ok">✅</span> Estilos CSS adicionados</p>
+                <p><span class="status-ok">✅</span> Função atualizarEquipamento() criada</p>
+                <p><span class="status-ok">✅</span> Edição de Técnicos implementada</p>
+                <p><span class="status-ok">✅</span> Edição de Equipamentos implementada</p>
+                <p><span class="status-ok">✅</span> Edição de Ordens de Serviço implementada</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Testes Rápidos</h2>
+
+            <h3>1. Modal System</h3>
+            <button class="btn btn-primary test-button" onclick="testarModal()">
+                🔬 Testar Modal
+            </button>
+            <p id="modal-test-result"></p>
+
+            <h3>2. Formulário Dinâmico</h3>
+            <button class="btn btn-primary test-button" onclick="testarFormulario()">
+                🔬 Testar Formulário
+            </button>
+            <p id="form-test-result"></p>
+
+            <h3>3. Integração com API</h3>
+            <button class="btn btn-primary test-button" onclick="testarAPI()">
+                🔬 Testar Conexão API
+            </button>
+            <p id="api-test-result"></p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Como Usar</h2>
+            <ol>
+                <li>Acesse a página <strong>Técnicos</strong></li>
+                <li>Clique no botão <strong>✏️ Editar</strong> de qualquer técnico</li>
+                <li>Modifique os campos desejados</li>
+                <li>Clique em <strong>💾 Salvar</strong></li>
+                <li>Veja a confirmação com toast</li>
+            </ol>
+
+            <h3>Campos Editáveis por Entidade:</h3>
+            <ul>
+                <li><strong>Técnico:</strong> Nome, Email, Telefone, Especialidade, Setor, Status</li>
+                <li><strong>Equipamento:</strong> Nome, Código, Setor, Criticidade, Status, Última Manutenção</li>
+                <li><strong>Ordem de Serviço:</strong> Status, Prioridade, Descrição, Data Fechamento</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Arquivos Modificados</h2>
+            <ul>
+                <li>✨ <code>frontend/js/modal.js</code> (novo)</li>
+                <li>🔧 <code>frontend/js/api.js</code> (+atualizarEquipamento)</li>
+                <li>🔧 <code>frontend/pages/tecnicos/tecnicos.js</code> (PUT implementado)</li>
+                <li>🔧 <code>frontend/pages/equipamentos/equipamentos.js</code> (PUT implementado)</li>
+                <li>🔧 <code>frontend/pages/ordens/ordens.js</code> (PUT implementado)</li>
+                <li>🎨 <code>frontend/css/style.css</code> (estilos de modal)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Troubleshooting</h2>
+            <div class="test-info">
+                <p><strong>Modal não abre?</strong></p>
+                <ul>
+                    <li>Verifique se está importando de modal.js corretamente</li>
+                    <li>Abra o console (F12) e procure por erros</li>
+                    <li>Certifique-se que modal.js está no caminho correto</li>
+                </ul>
+            </div>
+
+            <div class="test-info">
+                <p><strong>Formulário vazio?</strong></p>
+                <ul>
+                    <li>Verifique se a API está respondendo com os dados</li>
+                    <li>Procure por erros de rede no DevTools (Network tab)</li>
+                    <li>Veja se os nomes dos campos correspondem aos do backend</li>
+                </ul>
+            </div>
+
+            <div class="test-info">
+                <p><strong>PUT não funciona?</strong></p>
+                <ul>
+                    <li>Verifique se o backend está rodando (http://localhost:8080)</li>
+                    <li>Verifique a resposta no Network tab do DevTools</li>
+                    <li>Procure por erros CORS ou de validação</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from './js/modal.js';
+
+        window.testarModal = function() {
+            const resultado = document.getElementById('modal-test-result');
+            try {
+                mostrarModal(
+                    '🧪 Teste de Modal',
+                    '<p>Se você vê este modal, o sistema funciona! ✅</p>',
+                    [{
+                        label: 'Validar',
+                        classe: 'btn-success',
+                        callback: () => {
+                            resultado.innerHTML = '<span class="status-ok">✅ Modal funciona corretamente!</span>';
+                            fecharModal();
+                        }
+                    }]
+                );
+            } catch (e) {
+                resultado.innerHTML = `<span class="status-error">❌ Erro: ${e.message}</span>`;
+            }
+        };
+
+        window.testarFormulario = function() {
+            const resultado = document.getElementById('form-test-result');
+            try {
+                const dadosTeste = {
+                    nome: 'João Silva',
+                    email: 'joao@example.com',
+                    status: 'DISPONIVEL'
+                };
+
+                const campos = [
+                    { nome: 'nome', label: 'Nome', tipo: 'text' },
+                    { nome: 'email', label: 'Email', tipo: 'email' },
+                    {
+                        nome: 'status',
+                        label: 'Status',
+                        tipo: 'select',
+                        opcoes: [
+                            { value: 'DISPONIVEL', label: 'Disponível' },
+                            { value: 'OCUPADO', label: 'Ocupado' }
+                        ]
+                    }
+                ];
+
+                const conteudo = criarFormularioEdicao(dadosTeste, campos);
+
+                mostrarModal(
+                    '🧪 Teste de Formulário',
+                    conteudo,
+                    [{
+                        label: 'Testar Captura',
+                        classe: 'btn-success',
+                        callback: () => {
+                            const valores = obterValoresFormularioModal(['nome', 'email', 'status']);
+                            console.log('Valores capturados:', valores);
+                            resultado.innerHTML = `<span class="status-ok">✅ Formulário funciona! Valores: ${JSON.stringify(valores)}</span>`;
+                            fecharModal();
+                        }
+                    }]
+                );
+            } catch (e) {
+                resultado.innerHTML = `<span class="status-error">❌ Erro: ${e.message}</span>`;
+            }
+        };
+
+        window.testarAPI = function() {
+            const resultado = document.getElementById('api-test-result');
+            fetch('http://localhost:8080/actuator/health')
+                .then(r => r.json())
+                .then(data => {
+                    resultado.innerHTML = `<span class="status-ok">✅ API conectada! Status: ${data.status}</span>`;
+                })
+                .catch(e => {
+                    resultado.innerHTML = `<span class="status-error">❌ Erro na conexão: ${e.message}</span>`;
+                });
+        };
+    </script>
+</body>
+</html>
+

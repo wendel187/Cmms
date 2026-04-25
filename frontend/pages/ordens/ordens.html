@@ -1,0 +1,32 @@
+<!-- ORDENS DE SERVIÇO - Listagem e Gerenciamento -->
+<section id="ordens-tab" class="tab-content">
+    <div class="page-header">
+        <h2>?? Ordens de Serviço</h2>
+        <div class="page-actions">
+            <button class="btn btn-secondary" id="btn-recarregar-ordens">
+                <span class="icon">??</span> Recarregar
+            </button>
+        </div>
+    </div>
+    <!-- Filtros -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label for="filtro-status">Filtrar por Status:</label>
+            <select id="filtro-status" class="filter-select">
+                <option value="">Todos</option>
+                <option value="ABERTA">Aberta</option>
+                <option value="EM_ANDAMENTO">Em Andamento</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="CANCELADA">Cancelada</option>
+            </select>
+        </div>
+    </div>
+    <div class="ordens-container">
+        <!-- Lista de ordens será renderizada aqui -->
+        <div id="ordens-list" class="list-container">
+            <div class="loading-spinner">
+                <span>? Carregando ordens...</span>
+            </div>
+        </div>
+    </div>
+</section>
