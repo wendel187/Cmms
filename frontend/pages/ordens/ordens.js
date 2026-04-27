@@ -58,7 +58,7 @@ function renderizarOrdens(ordens) {
         `;
     } else {
         listEl.innerHTML = ordens.map(o => `
-            <div class="item-card">
+            <div class="item-card" data-id="${o.id}">
                 <div class="item-title">📋 OS #${o.id}</div>
                 <div class="item-detail">
                     <div class="item-detail-row">
@@ -79,7 +79,7 @@ function renderizarOrdens(ordens) {
                     </div>
                     <div class="item-detail-row">
                         <span class="item-detail-label">Prioridade:</span>
-                        <span class="priority-badge ${o.prioridade?.toLowerCase()}">${o.prioridade || 'N/A'}</span>
+                        <span class="priority-badge ${String(o.prioridade || '').toLowerCase()}">${o.prioridade || 'N/A'}</span>
                     </div>
                     <div class="item-detail-row">
                         <span class="item-detail-label">Data Abertura:</span>
@@ -88,6 +88,56 @@ function renderizarOrdens(ordens) {
                 </div>
             </div>
         `).join('');
+
+        adicionarEventosCliqueOrdens();
+    }
+}
+
+/**
+ * Adicionar evento de clique para exibir detalhes da OS
+ */
+function adicionarEventosCliqueOrdens() {
+    const itens = document.querySelectorAll('.item-card');
+    itens.forEach(item => {
+        item.addEventListener('click', async () => {
+            const id = item.dataset.id;
+            if (id) {
+                await exibirDetalhesOrdem(id);
+            }
+        });
+    });
+}
+
+/**
+ * Exibir detalhes da OS em um modal
+ */
+async function exibirDetalhesOrdem(id) {
+    try {
+        const ordem = await carregarOrdem(id);
+
+        const conteudo = `
+            <div class="detalhes-ordem">
+                <h3>Detalhes da OS #${ordem.id}</h3>
+                <p><strong>Tipo:</strong> ${ordem.tipo || 'N/A'}</p>
+                <p><strong>Status:</strong> ${ordem.status || 'N/A'}</p>
+                <p><strong>Equipamento:</strong> ${ordem.equipamento?.nome || 'N/A'}</p>
+                <p><strong>Técnico:</strong> ${ordem.tecnico?.nome || 'Não atribuído'}</p>
+                <p><strong>Prioridade:</strong> ${ordem.prioridade || 'N/A'}</p>
+                <p><strong>Data de Abertura:</strong> ${ordem.dataAbertura ? formatarData(ordem.dataAbertura) : 'N/A'}</p>
+                <p><strong>Descrição:</strong> ${ordem.descricao || 'N/A'}</p>
+            </div>
+        `;
+
+        mostrarModal(`Detalhes da OS #${ordem.id}`, conteudo, [
+            {
+                label: 'Fechar',
+                classe: 'btn-secondary',
+                callback: fecharModal
+            }
+        ]);
+    } catch (error) {
+        console.error('Erro ao carregar detalhes da ordem:', error);
+        mostrarToast('❌ Erro ao carregar detalhes da ordem', 'error');
     }
 }
 

@@ -43,13 +43,23 @@ export function getCriticidadeBadge(criticidade) {
 
 /**
  * Calcula prioridade e retorna badge
- * @param {number} prioridade - Número de prioridade
+ * @param {number|string} prioridade - Número ou string de prioridade
  * @returns {string} Badge HTML
  */
 export function getPrioridadeBadge(prioridade) {
-    if (prioridade >= 12) return '🔴 Crítica';
-    if (prioridade >= 8) return '🟠 Alta';
-    if (prioridade >= 4) return '🟡 Média';
+    // Converter para número se for string
+    let valor = prioridade;
+    if (typeof prioridade === 'string') {
+        valor = parseInt(prioridade);
+        // Se não conseguir converter para número, retornar como está
+        if (isNaN(valor)) {
+            return prioridade || 'N/A';
+        }
+    }
+    
+    if (valor >= 12) return '🔴 Crítica';
+    if (valor >= 8) return '🟠 Alta';
+    if (valor >= 4) return '🟡 Média';
     return '🟢 Baixa';
 }
 

@@ -1,19 +1,38 @@
-// ==================== CONFIGURAÇÃO ====================
+// ==================== CONFIGURAÇÃO E IMPORTAÇÕES ====================
 import { API_BASE_URL, API_ENDPOINTS } from './config.js';
 import { inicializarTecnicos } from '../pages/tecnicos/tecnicos.js';
 import { inicializarEquipamentos } from '../pages/equipamentos/equipamentos.js';
 import { inicializarOrdens } from '../pages/ordens/ordens.js';
 import { mostrarModal, fecharModal } from './modal.js';
 
-// Para compatibilidade com código existente
-const API_CONFIG = {
-    BASE_URL: API_BASE_URL,
-    ENDPOINTS: API_ENDPOINTS
-};
+// Importar módulos refatorados
+import { ativarAba, ativarListagem, ativarTipoOS } from './modules/navigationManager.js';
+import { 
+    post, get, put, del, 
+    buscarTecnicos, buscarEquipamentos, buscarOrdensAbertas,
+    buscarTecnico, buscarOrdem,
+    criarTecnico, criarEquipamento, criarOSCorretiva, criarOSPreventiva,
+    atualizarTecnico as atualizarTecnicoAPI, atualizarEquipamento, atualizarStatusOS,
+    deletarTecnico, deletarEquipamento, deletarOrdem,
+    verificarConexaoBackend,
+    comFeedback
+} from './modules/apiClient.js';
+import {
+    renderizarListaTecnicos, renderizarListaEquipamentos, renderizarListaOrdens,
+    renderizarErro
+} from './modules/componentRenderer.js';
+import {
+    extrairDadosFormulario, limparFormulario as limparFormularioHelper,
+    preencherFormulario, definirEstadoFormulario, obterValor, definirValor
+} from './modules/formManager.js';
+import {
+    mostrarToast, formatarData, getStatusBadge, getCriticidadeBadge, getPrioridadeBadge,
+    mostrarFeedback
+} from './utils.js';
 
 // ==================== INICIALIZAÇÃO ====================
-document.addEventListener('DOMContentLoaded', () => {
-    verificarConexao();
+document.addEventListener('DOMContentLoaded', async () => {
+    await verificarConexao();
     inicializarEventos();
     
     // Inicializar módulos de páginas
@@ -21,31 +40,26 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarEquipamentos();
     inicializarOrdens();
     
-    carregarTecnicos();
-    carregarEquipamentos();
-    carregarOrdens();
+    // Carregar dados iniciais
+    await Promise.all([
+        carregarTecnicos(),
+        carregarEquipamentos(),
+        carregarOrdens()
+    ]);
 });
 
 // ==================== VERIFICAR CONEXÃO ====================
 async function verificarConexao() {
+    const badgeEl = document.getElementById('status-conexao');
+    if (!badgeEl) return;
+
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/actuator/health`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-        
-        const badgeEl = document.getElementById('status-conexao');
-        if (response.ok) {
-            badgeEl.textContent = '🟢 Conectado';
-            badgeEl.classList.remove('loading');
-        } else {
-            badgeEl.textContent = '🔴 Erro na conexão';
-            badgeEl.classList.remove('loading');
-        }
+        const conectado = await verificarConexaoBackend();
+        badgeEl.textContent = conectado ? '🟢 Conectado' : '🔴 Erro na conexão';
     } catch (error) {
-        console.error('Erro ao conectar:', error);
-        const badgeEl = document.getElementById('status-conexao');
+        console.error('Erro ao verificar conexão:', error);
         badgeEl.textContent = '🔴 Desconectado';
+    } finally {
         badgeEl.classList.remove('loading');
     }
 }
@@ -54,123 +68,45 @@ async function verificarConexao() {
 function inicializarEventos() {
     // Abas principais
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => mudarAba(btn.dataset.tab));
+        btn.addEventListener('click', () => ativarAba(btn.dataset.tab));
     });
 
     // Abas de listagem
     document.querySelectorAll('.listagem-btn').forEach(btn => {
-        btn.addEventListener('click', () => mudarListagem(btn.dataset.listagem));
+        btn.addEventListener('click', (event) => ativarListagem(btn.dataset.listagem, event));
     });
 
     // Seletor de tipo de OS
     document.querySelectorAll('.tipo-btn').forEach(btn => {
-        btn.addEventListener('click', () => mudarTipoOS(btn.dataset.tipo));
+        btn.addEventListener('click', (event) => ativarTipoOS(btn.dataset.tipo, event));
     });
 
     // Formulários
-    document.getElementById('form-tecnico').addEventListener('submit', cadastrarTecnico);
-    document.getElementById('form-equipamento').addEventListener('submit', cadastrarEquipamento);
-    document.getElementById('form-os-corretiva').addEventListener('submit', criarOSCorretiva);
-    document.getElementById('form-os-preventiva').addEventListener('submit', criarOSPreventiva);
-    document.getElementById('form-atualizar-tecnico').addEventListener('submit', atualizarTecnico);
-    document.getElementById('form-atualizar-os').addEventListener('submit', atualizarOS);
-}
-
-// ==================== NAVEGAÇÃO ENTRE ABAS ====================
-function mudarAba(nomeAba) {
-    // Remover ativo de todos
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-    // Ativar aba selecionada
-    const tabId = nomeAba + '-tab';
-    const tabEl = document.getElementById(tabId);
-    if (tabEl) {
-        tabEl.classList.add('active');
-    }
-    
-    // Encontra e ativa o botão clicado
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        if (btn.dataset.tab === nomeAba) {
-            btn.classList.add('active');
-        }
-    });
-
-    // Recarregar dados se necessário
-    if (nomeAba === 'tecnicos') {
-        setTimeout(() => carregarTecnicosPage(), 100);
-    } else if (nomeAba === 'equipamentos') {
-        setTimeout(() => carregarEquipamentosPage(), 100);
-    } else if (nomeAba === 'ordens') {
-        setTimeout(() => carregarOrdensPage(), 100);
-    } else if (nomeAba === 'atualizar-tecnico') {
-        // Carregar técnicos no select quando abrir a aba
-        setTimeout(() => carregarTecnicos(), 100);
-    } else if (nomeAba === 'atualizar-os') {
-        // Carregar ordens e técnicos nos selects quando abrir a aba
-        setTimeout(() => {
-            carregarOrdens();
-            carregarTecnicos();
-        }, 100);
-    }
+    document.getElementById('form-tecnico')?.addEventListener('submit', cadastrarTecnico);
+    document.getElementById('form-equipamento')?.addEventListener('submit', cadastrarEquipamento);
+    document.getElementById('form-os-corretiva')?.addEventListener('submit', criarOSCorretiva);
+    document.getElementById('form-os-preventiva')?.addEventListener('submit', criarOSPreventiva);
+    document.getElementById('form-atualizar-tecnico')?.addEventListener('submit', atualizarTecnico);
+    document.getElementById('form-atualizar-os')?.addEventListener('submit', atualizarOS);
 }
 
 
-function mudarListagem(tipo) {
-    // Remover ativo de todos
-    document.querySelectorAll('.listagem-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.listagem-btn').forEach(btn => btn.classList.remove('active'));
 
-    // Ativar selecionado
-    document.getElementById('listagem-' + tipo).classList.add('active');
-    event.target.closest('.listagem-btn').classList.add('active');
-}
-
-function mudarTipoOS(tipo) {
-    // Remover ativo
-    document.querySelectorAll('.requisicao-form-container').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.remove('active'));
-
-    // Ativar selecionado
-    document.getElementById('form-' + tipo + '-container').classList.add('active');
-    event.target.closest('.tipo-btn').classList.add('active');
-}
 
 // ==================== CADASTRO TÉCNICO ====================
 async function cadastrarTecnico(e) {
     e.preventDefault();
     
     const form = e.target;
-    const dados = {
-        nome: document.getElementById('tecnico-nome').value,
-        email: document.getElementById('tecnico-email').value,
-        telefone: document.getElementById('tecnico-telefone').value,
-        especialidade: document.getElementById('tecnico-especialidade').value,
-        setor: document.getElementById('tecnico-setor').value,
-        status: document.getElementById('tecnico-status').value
-    };
-
+    const dados = extrairDadosFormulario('tecnico');
+    
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        const feedback = document.getElementById('tecnico-feedback');
-        
-        if (response.ok) {
-            const resultado = await response.json();
-            mostrarFeedback(feedback, `✅ Técnico ${dados.nome} cadastrado com sucesso!`, 'success');
-            form.reset();
-            carregarTecnicos();
-            setTimeout(() => carregarEquipamentos(), 500);
-        } else {
-            const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
-        }
+        await criarTecnico(dados);
+        mostrarToast(`✅ Técnico ${dados.tecnicoNome} cadastrado com sucesso!`, 'success');
+        limparFormulario('form-tecnico');
+        await Promise.all([carregarTecnicos(), carregarEquipamentos()]);
     } catch (error) {
-        mostrarFeedback(document.getElementById('tecnico-feedback'), `❌ Erro: ${error.message}`, 'error');
+        mostrarToast(`❌ Erro: ${error.message}`, 'error');
     }
 }
 
@@ -178,42 +114,22 @@ async function cadastrarTecnico(e) {
 async function cadastrarEquipamento(e) {
     e.preventDefault();
     
-    const form = e.target;
-    const dados = {
-        nome: document.getElementById('equip-nome').value,
-        codigo: document.getElementById('equip-codigo').value,
-        status: document.getElementById('equip-status').value,
-        criticidade: document.getElementById('equip-criticidade').value,
-        setor: document.getElementById('equip-setor').value
-    };
-
+    const dados = extrairDadosFormulario('equipamento');
+    
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        const feedback = document.getElementById('equipamento-feedback');
-        
-        if (response.ok) {
-            const resultado = await response.json();
-            mostrarFeedback(feedback, `✅ Equipamento ${dados.nome} cadastrado com sucesso!`, 'success');
-            form.reset();
-            carregarEquipamentos();
-        } else {
-            const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
-        }
+        await criarEquipamento(dados);
+        mostrarToast(`✅ Equipamento ${dados.equipNome} cadastrado com sucesso!`, 'success');
+        limparFormulario('form-equipamento');
+        await carregarEquipamentos();
     } catch (error) {
-        mostrarFeedback(document.getElementById('equipamento-feedback'), `❌ Erro: ${error.message}`, 'error');
+        mostrarToast(`❌ Erro: ${error.message}`, 'error');
     }
 }
 
 // ==================== CRIAR OS CORRETIVA ====================
 async function criarOSCorretiva(e) {
     e.preventDefault();
-    
+
     const form = e.target;
     const falhaCheckbox = document.getElementById('corr-falha-total');
     const dados = {
@@ -234,20 +150,16 @@ async function criarOSCorretiva(e) {
         });
 
         const feedback = document.getElementById('corretiva-feedback');
-        
         if (response.ok) {
-            const resultado = await response.json();
-            mostrarToast(`✅ OS Corretiva #${resultado.id} criada com sucesso!`, 'success');
-            mostrarFeedback(feedback, `✅ Ordem de Serviço #${resultado.id} aberta! Status: ${resultado.status}`, 'success');
+            mostrarToast('✅ OS Corretiva criada com sucesso!', 'success');
             form.reset();
-            carregarOrdens();
-            setTimeout(() => feedback.classList.remove('show'), 3000);
         } else {
-            const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
+            const error = await response.text();
+            mostrarToast(`❌ Erro ao criar OS: ${error}`, 'error');
         }
     } catch (error) {
-        mostrarFeedback(document.getElementById('corretiva-feedback'), `❌ Erro: ${error.message}`, 'error');
+        console.error('Erro ao criar OS Corretiva:', error);
+        mostrarToast('❌ Erro ao criar OS Corretiva', 'error');
     }
 }
 
@@ -255,184 +167,82 @@ async function criarOSCorretiva(e) {
 async function criarOSPreventiva(e) {
     e.preventDefault();
     
-    const form = e.target;
-    const dados = {
-        equipamentoId: parseInt(document.getElementById('prev-equipamento').value),
-        tecnicoId: parseInt(document.getElementById('prev-tecnico').value),
-        descricao: document.getElementById('prev-descricao').value,
-        setor: document.getElementById('prev-setor').value,
-        dataPrevista: document.getElementById('prev-data-prevista').value,
-        periodicidadeDias: parseInt(document.getElementById('prev-periodicidade').value),
-        ultimaManutencao: document.getElementById('prev-ultima-manutencao').value || null
-    };
-
+    const dados = extrairDadosFormulario('osPreventiva');
+    // Garantir tipos corretos
+    dados.prevEquipamento = parseInt(dados.prevEquipamento);
+    dados.prevTecnico = parseInt(dados.prevTecnico);
+    dados.prevPeriodicidade = parseInt(dados.prevPeriodicidade);
+    
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/preventiva`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
+        const resultado = await criarOSPreventiva({
+            equipamentoId: dados.prevEquipamento,
+            tecnicoId: dados.prevTecnico,
+            descricao: dados.prevDescricao,
+            setor: dados.prevSetor,
+            dataPrevista: dados.prevDataPrevista,
+            periodicidadeDias: dados.prevPeriodicidade,
+            ultimaManutencao: dados.prevUltimaManutencao || null
         });
-
-        const feedback = document.getElementById('preventiva-feedback');
         
-        if (response.ok) {
-            const resultado = await response.json();
-            mostrarToast(`✅ OS Preventiva #${resultado.id} criada com sucesso!`, 'success');
-            mostrarFeedback(feedback, `✅ Ordem de Serviço #${resultado.id} agendada! Data prevista: ${dados.dataPrevista}`, 'success');
-            form.reset();
-            carregarOrdens();
-            setTimeout(() => feedback.classList.remove('show'), 3000);
-        } else {
-            const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro: ${erro}`, 'error');
-        }
+        mostrarToast(`✅ OS Preventiva #${resultado.id} criada com sucesso!`, 'success');
+        limparFormulario('form-os-preventiva');
+        await carregarOrdens();
     } catch (error) {
-        mostrarFeedback(document.getElementById('preventiva-feedback'), `❌ Erro: ${error.message}`, 'error');
+        mostrarToast(`❌ Erro ao criar OS: ${error.message}`, 'error');
     }
 }
 
 // ==================== CARREGAR TÉCNICOS ====================
 async function carregarTecnicos() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico?page=0&size=100`);
-        const data = await response.json();
-        const tecnicos = data.content || [];
-
-        // Popular selects
+        const tecnicos = await buscarTecnicos();
+        
+        // Popular selects com técnicos
         atualizarSelectTecnicos(tecnicos);
-
-        // Popular listagem
-        const listEl = document.getElementById('tecnicos-list');
-        if (tecnicos.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">👨‍🔧</div>
-                    <p>Nenhum técnico cadastrado</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = tecnicos.map(t => `
-                <div class="item-card">
-                    <div class="item-title">👨‍🔧 ${t.nome}</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Email:</span>
-                            <span>${t.email}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Telefone:</span>
-                            <span>${t.telefone}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Especialidade:</span>
-                            <span>${t.especialidade}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${t.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(t.status)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        
+        // Renderizar listagem
+        const container = document.getElementById('tecnicos-list');
+        renderizarListaTecnicos(container, tecnicos, false);
     } catch (error) {
         console.error('Erro ao carregar técnicos:', error);
+        const container = document.getElementById('tecnicos-list');
+        renderizarErro(container, 'Erro ao carregar técnicos');
     }
 }
 
 // ==================== CARREGAR EQUIPAMENTOS ====================
 async function carregarEquipamentos() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento?page=0&size=100`);
-        const data = await response.json();
-        const equipamentos = data.content || [];
-
-        // Popular selects
+        const equipamentos = await buscarEquipamentos();
+        
+        // Popular selects com equipamentos
         atualizarSelectEquipamentos(equipamentos);
-
-        // Popular listagem
-        const listEl = document.getElementById('equipamentos-list');
-        if (equipamentos.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">🔧</div>
-                    <p>Nenhum equipamento cadastrado</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = equipamentos.map(e => `
-                <div class="item-card">
-                    <div class="item-title">🔧 ${e.nome} (${e.codigo})</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${e.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Criticidade:</span>
-                            <span>${getCriticidadeBadge(e.criticidade)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(e.status)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        
+        // Renderizar listagem
+        const container = document.getElementById('equipamentos-list');
+        renderizarListaEquipamentos(container, equipamentos, false);
     } catch (error) {
         console.error('Erro ao carregar equipamentos:', error);
+        const container = document.getElementById('equipamentos-list');
+        renderizarErro(container, 'Erro ao carregar equipamentos');
     }
 }
 
 // ==================== CARREGAR ORDENS ====================
 async function carregarOrdens() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/abertas`);
-        const ordens = await response.json();
-
-        // Atualizar select de atualização de OS
+        const ordens = await buscarOrdensAbertas();
+        
+        // Popular select de atualização de OS
         atualizarSelectOS(ordens);
-
-        const listEl = document.getElementById('ordens-list');
-        if (!Array.isArray(ordens) || ordens.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">📋</div>
-                    <p>Nenhuma ordem aberta</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = ordens.map(o => `
-                <div class="item-card">
-                    <div class="item-title">📋 OS #${o.id} - ${o.descricao.substring(0, 50)}...</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${o.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(o.status)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Prioridade:</span>
-                            <span>${getPrioridadeBadge(o.prioridade)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Abertura:</span>
-                            <span>${formatarData(o.dataAbertura)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        
+        // Renderizar listagem
+        const container = document.getElementById('ordens-list');
+        renderizarListaOrdens(container, ordens, false);
     } catch (error) {
         console.error('Erro ao carregar ordens:', error);
+        const container = document.getElementById('ordens-list');
+        renderizarErro(container, 'Erro ao carregar ordens de serviço');
     }
 }
 
@@ -549,238 +359,97 @@ function recarregarOrdens() {
 // ==================== CARREGAR PÁGINAS SEPARADAS ====================
 async function carregarTecnicosPage() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico?page=0&size=100`);
-        const data = await response.json();
-        const tecnicos = data.content || [];
-
-        const listEl = document.getElementById('tecnicos-list-page');
-        if (tecnicos.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">👨‍🔧</div>
-                    <p>Nenhum técnico cadastrado</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = tecnicos.map(t => `
-                <div class="item-card-large">
-                    <div class="item-title">👨‍🔧 ${t.nome}</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Email:</span>
-                            <span>${t.email}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Telefone:</span>
-                            <span>${t.telefone}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Especialidade:</span>
-                            <span><strong>${t.especialidade}</strong></span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${t.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(t.status)}</span>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        const tecnicos = await buscarTecnicos();
+        const container = document.getElementById('tecnicos-list-page');
+        renderizarListaTecnicos(container, tecnicos, true);
     } catch (error) {
         console.error('Erro ao carregar técnicos:', error);
-        document.getElementById('tecnicos-list-page').innerHTML = `<div class="error-message">❌ Erro ao carregar técnicos</div>`;
+        const container = document.getElementById('tecnicos-list-page');
+        renderizarErro(container, 'Erro ao carregar técnicos');
     }
 }
 
 async function carregarEquipamentosPage() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/equipamento?page=0&size=100`);
-        const data = await response.json();
-        const equipamentos = data.content || [];
-
-        const listEl = document.getElementById('equipamentos-list-page');
-        if (equipamentos.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">🔧</div>
-                    <p>Nenhum equipamento cadastrado</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = equipamentos.map(e => `
-                <div class="item-card-large">
-                    <div class="item-title">🔧 ${e.nome}</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Código:</span>
-                            <span><strong>${e.codigo}</strong></span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${e.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Criticidade:</span>
-                            <span>${getCriticidadeBadge(e.criticidade)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(e.status)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        const equipamentos = await buscarEquipamentos();
+        const container = document.getElementById('equipamentos-list-page');
+        renderizarListaEquipamentos(container, equipamentos, true);
     } catch (error) {
         console.error('Erro ao carregar equipamentos:', error);
-        document.getElementById('equipamentos-list-page').innerHTML = `<div class="error-message">❌ Erro ao carregar equipamentos</div>`;
+        const container = document.getElementById('equipamentos-list-page');
+        renderizarErro(container, 'Erro ao carregar equipamentos');
     }
 }
 
 async function carregarOrdensPage() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/ordens-servico/abertas`);
-        const ordens = await response.json();
-
-        const listEl = document.getElementById('ordens-list-page');
-        if (!Array.isArray(ordens) || ordens.length === 0) {
-            listEl.innerHTML = `
-                <div class="item-empty">
-                    <div class="item-empty-icon">📋</div>
-                    <p>Nenhuma ordem aberta</p>
-                </div>
-            `;
-        } else {
-            listEl.innerHTML = ordens.map(o => `
-                <div class="item-card-large">
-                    <div class="item-title clickable">📋 OS #${o.id} - ${o.descricao.substring(0, 60)}...</div>
-                    <div class="item-detail">
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Setor:</span>
-                            <span>${o.setor}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Status:</span>
-                            <span>${getStatusBadge(o.status)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Prioridade:</span>
-                            <span>${getPrioridadeBadge(o.prioridade)}</span>
-                        </div>
-                        <div class="item-detail-row">
-                            <span class="item-detail-label">Abertura:</span>
-                            <span>${formatarData(o.dataAbertura)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        const ordens = await buscarOrdensAbertas();
+        const container = document.getElementById('ordens-list-page');
+        renderizarListaOrdens(container, ordens, true);
     } catch (error) {
         console.error('Erro ao carregar ordens:', error);
-        document.getElementById('ordens-list-page').innerHTML = `<div class="error-message">❌ Erro ao carregar ordens de serviço</div>`;
+        const container = document.getElementById('ordens-list-page');
+        renderizarErro(container, 'Erro ao carregar ordens de serviço');
     }
 }
-
 
 // ==================== ATUALIZAR TÉCNICO ====================
 async function carregarDadosTecnico(tecnicoId) {
     if (!tecnicoId) {
         document.getElementById('tecnico-form-container').style.display = 'none';
-        document.getElementById('atualizar-tecnico-feedback').textContent = '';
         return;
     }
 
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico/${tecnicoId}`);
-        if (!response.ok) {
-            throw new Error('Técnico não encontrado');
-        }
-
-        const tecnico = await response.json();
-        
-        // Preencher formulário
-        document.getElementById('atualizar-tecnico-nome').value = tecnico.nome || '';
-        document.getElementById('atualizar-tecnico-email').value = tecnico.email || '';
-        document.getElementById('atualizar-tecnico-telefone').value = tecnico.telefone || '';
-        document.getElementById('atualizar-tecnico-especialidade').value = tecnico.especialidade || '';
-        document.getElementById('atualizar-tecnico-setor').value = tecnico.setor || '';
-        document.getElementById('atualizar-tecnico-status').value = tecnico.status || '';
-        
-        // Mostrar formulário
+        const tecnico = await buscarTecnico(tecnicoId);
+        preencherFormulario('form-atualizar-tecnico', tecnico);
         document.getElementById('tecnico-form-container').style.display = 'block';
-        document.getElementById('atualizar-tecnico-feedback').textContent = '';
         
-        // Resetar estado dos botões (mostrar Editar, esconder Salvar/Cancelar)
+        // Resetar botões
         document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
-        document.getElementById('btn-salvar-tecnico').style.display = 'none';
+        documento.getElementById('btn-salvar-tecnico').style.display = 'none';
         document.getElementById('btn-cancelar-tecnico').style.display = 'none';
     } catch (error) {
         document.getElementById('tecnico-form-container').style.display = 'none';
-        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro ao carregar técnico: ${error.message}`, 'error');
+        mostrarToast(`❌ Erro ao carregar técnico: ${error.message}`, 'error');
     }
 }
 
 async function atualizarTecnico(e) {
     e.preventDefault();
 
-    const tecnicoId = document.getElementById('atualizar-tecnico-id').value;
+    const tecnicoId = obterValor('atualizar-tecnico-id');
     if (!tecnicoId) {
-        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Selecione um técnico primeiro!`, 'error');
+        mostrarToast('❌ Selecione um técnico primeiro!', 'error');
         return;
     }
 
     const dados = {
-        id: parseInt(tecnicoId),
-        nome: document.getElementById('atualizar-tecnico-nome').value,
-        email: document.getElementById('atualizar-tecnico-email').value,
-        telefone: document.getElementById('atualizar-tecnico-telefone').value,
-        especialidade: document.getElementById('atualizar-tecnico-especialidade').value,
-        setor: document.getElementById('atualizar-tecnico-setor').value,
-        status: document.getElementById('atualizar-tecnico-status').value
+        nome: obterValor('atualizar-tecnico-nome'),
+        email: obterValor('atualizar-tecnico-email'),
+        telefone: obterValor('atualizar-tecnico-telefone'),
+        especialidade: obterValor('atualizar-tecnico-especialidade'),
+        setor: obterValor('atualizar-tecnico-setor'),
+        status: obterValor('atualizar-tecnico-status')
     };
 
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/tecnico/${tecnicoId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        const feedback = document.getElementById('atualizar-tecnico-feedback');
-        
-        if (response.ok) {
-            mostrarFeedback(feedback, `✅ Técnico ${dados.nome} atualizado com sucesso!`, 'success');
-            mostrarToast(`✅ Técnico atualizado!`, 'success');
-            carregarTecnicos();
-            setTimeout(() => {
-                limparFormularioTecnico();
-                cancelarEdicaoTecnico();
-            }, 1500);
-        } else {
-            const erro = await response.text();
-            mostrarFeedback(feedback, `❌ Erro ao atualizar: ${erro}`, 'error');
-        }
+        await atualizarTecnicoAPI(tecnicoId, dados);
+        mostrarToast(`✅ Técnico atualizado!`, 'success');
+        limparFormulario('form-atualizar-tecnico');
+        await carregarTecnicos();
+        cancelarEdicaoTecnico();
     } catch (error) {
-        mostrarFeedback(document.getElementById('atualizar-tecnico-feedback'), `❌ Erro: ${error.message}`, 'error');
+        mostrarToast(`❌ Erro ao atualizar: ${error.message}`, 'error');
     }
 }
 
-function limparFormularioTecnico() {
-    document.getElementById('form-atualizar-tecnico').reset();
-    document.getElementById('atualizar-tecnico-id').value = '';
-    document.getElementById('tecnico-form-container').style.display = 'none';
-    document.getElementById('atualizar-tecnico-feedback').textContent = '';
-    document.getElementById('atualizar-tecnico-feedback').classList.remove('show');
-    
-    // Resetar botões de edição
-    document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
-    document.getElementById('btn-salvar-tecnico').style.display = 'none';
-    document.getElementById('btn-cancelar-tecnico').style.display = 'none';
+function limparFormulario(formId) {
+    limparFormularioHelper(formId);
+    const container = document.getElementById('tecnico-form-container');
+    if (container) {
+        container.style.display = 'none';
+    }
 }
 
 // ==================== ATUALIZAR ORDEM DE SERVIÇO ====================
