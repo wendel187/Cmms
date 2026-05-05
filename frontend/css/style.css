@@ -120,6 +120,10 @@ body {
     font-size: 1.2rem;
 }
 
+.tab-link {
+    text-decoration: none;
+}
+
 /* ==================== TAB CONTENT ==================== */
 .main-content {
     width: 100%;
