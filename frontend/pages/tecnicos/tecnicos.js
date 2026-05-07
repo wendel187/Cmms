@@ -10,7 +10,7 @@ import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecha
 export function inicializarTecnicos() {
     const btnRecarregar = document.getElementById('btn-recarregar-tecnicos');
     if (btnRecarregar) {
-        btnRecarregar.addEventListener('click', recarregarTecnicos);
+        btnRecarregar.onclick = recarregarTecnicos;
     }
     carregarTecnicosPage();
 }

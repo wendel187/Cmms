@@ -35,7 +35,7 @@ export function mostrarModal(titulo, conteudo, botoes = []) {
                         ${btn.label}
                     </button>
                 `).join('')}
-                <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
+                ${botoes.length === 0 ? '<button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>' : ''}
             </div>
         </div>
     `;

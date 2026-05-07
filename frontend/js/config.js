@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     equipamento: (id) => `/equipamento/${id}`,
     
     // Ordens de Serviço
+    ordens: '/ordens-servico',
     ordensAbertas: '/ordens-servico/abertas',
     ordem: (id) => `/ordens-servico/${id}`,
     ordemCorretiva: '/ordens-servico/corretiva',

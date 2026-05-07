@@ -1,6 +1,6 @@
 // ==================== ORDENS PAGE ====================
 
-import { carregarOrdensAbertas, carregarOrdem, atualizarOS, cancelarOrdemServico } from '../../js/api.js';
+import { carregarTodasOrdens, carregarOrdem, atualizarOS, cancelarOrdemServico } from '../../js/api.js';
 import { mostrarToast } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
@@ -12,12 +12,12 @@ let ordensGlobal = [];
 export function inicializarOrdens() {
     const btnRecarregar = document.getElementById('btn-recarregar-ordens');
     if (btnRecarregar) {
-        btnRecarregar.addEventListener('click', recarregarOrdens);
+        btnRecarregar.onclick = recarregarOrdens;
     }
 
     const filtroStatus = document.getElementById('filtro-status');
     if (filtroStatus) {
-        filtroStatus.addEventListener('change', filtrarOrdensPorStatus);
+        filtroStatus.onchange = filtrarOrdensPorStatus;
     }
 
     carregarOrdensPage();
@@ -28,7 +28,7 @@ export function inicializarOrdens() {
  */
 async function carregarOrdensPage() {
     try {
-        const ordens = await carregarOrdensAbertas();
+        const ordens = await carregarTodasOrdens();
         ordensGlobal = ordens || [];
         renderizarOrdens(ordensGlobal);
     } catch (error) {

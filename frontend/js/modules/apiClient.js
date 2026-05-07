@@ -44,6 +44,10 @@ async function fazerRequisicao(endpoint, method = HTTP_METHODS.GET, dados = null
             throw new Error(erro || `Erro HTTP ${response.status}`);
         }
 
+        if (response.status === 204 || response.headers.get('content-length') === '0') {
+            return null;
+        }
+
         return await response.json();
     } catch (error) {
         console.error(`Erro na requisição ${method} ${endpoint}:`, error);
@@ -99,7 +103,7 @@ export async function criarTecnico(dados) {
 }
 
 export async function atualizarTecnico(id, dados) {
-    return put(`/tecnico/${id}`, { id, ...dados });
+    return put('/tecnico', { id, ...dados });
 }
 
 export async function deletarTecnico(id) {
@@ -126,7 +130,7 @@ export async function criarEquipamento(dados) {
 }
 
 export async function atualizarEquipamento(id, dados) {
-    return put(`/equipamento/${id}`, { id, ...dados });
+    return put('/equipamento', { id, ...dados });
 }
 
 export async function deletarEquipamento(id) {
@@ -175,7 +179,7 @@ export async function deletarOrdem(id) {
 
 export async function verificarConexaoBackend() {
     try {
-        await get('/actuator/health');
+        await get('/tecnico?page=0&size=1');
         return true;
     } catch {
         return false;

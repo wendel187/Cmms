@@ -49,9 +49,9 @@
             <button class="tab-btn" data-tab="atualizar-os">
                 <span class="icon">🔄</span> Atualizar OS
             </button>
-            <a href="pages/historico/historico.html" class="tab-btn tab-link">
+            <button class="tab-btn" id="btn-historico" data-tab="historico_os" type="button">
                 <span class="icon">📜</span> Histórico de OS
-            </a>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -168,11 +168,11 @@
                 <div class="section-card">
                     <div class="section-header">
                         <h2>👨‍🔧 Técnicos Cadastrados</h2>
-                        <button type="button" class="btn btn-secondary" onclick="recarregarTecnicos()">
+                        <button type="button" id="btn-recarregar-tecnicos" class="btn btn-secondary">
                             <span class="icon">🔄</span> Recarregar
                         </button>
                     </div>
-                    <div id="tecnicos-list-page" class="items-list"></div>
+                    <div id="tecnicos-list" class="items-list"></div>
                 </div>
             </section>
 
@@ -181,11 +181,11 @@
                 <div class="section-card">
                     <div class="section-header">
                         <h2>🔧 Equipamentos Cadastrados</h2>
-                        <button type="button" class="btn btn-secondary" onclick="recarregarEquipamentos()">
+                        <button type="button" id="btn-recarregar-equipamentos" class="btn btn-secondary">
                             <span class="icon">🔄</span> Recarregar
                         </button>
                     </div>
-                    <div id="equipamentos-list-page" class="items-list"></div>
+                    <div id="equipamentos-list" class="items-list"></div>
                 </div>
             </section>
 
@@ -326,72 +326,27 @@
                 </div>
             </section>
 
-            <!-- TAB: LISTAGEM - Consultar -->
-            <section id="listagem-tab" class="tab-content">
-                <div class="listagem-container">
-                    <div class="listagem-tabs">
-                        <button class="listagem-btn active" data-listagem="tecnicos">
-                            <span class="icon">👨‍🔧</span> Técnicos
-                        </button>
-                        <button class="listagem-btn" data-listagem="equipamentos">
-                            <span class="icon">🔧</span> Equipamentos
-                        </button>
-                        <button class="listagem-btn" data-listagem="ordens">
-                            <span class="icon">📋</span> Ordens de Serviço
-                        </button>
-                    </div>
-
-                    <!-- LISTAGEM TÉCNICOS -->
-                    <div id="listagem-tecnicos" class="listagem-content active">
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>👨‍🔧 Técnicos Cadastrados</h2>
-                                <button type="button" class="btn btn-secondary" onclick="recarregarTecnicos()">
-                                    <span class="icon">🔄</span> Recarregar
-                                </button>
-                            </div>
-                            <div id="tecnicos-list" class="items-list"></div>
-                        </div>
-                    </div>
-
-                    <!-- LISTAGEM EQUIPAMENTOS -->
-                    <div id="listagem-equipamentos" class="listagem-content">
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>🔧 Equipamentos Cadastrados</h2>
-                                <button type="button" class="btn btn-secondary" onclick="recarregarEquipamentos()">
-                                    <span class="icon">🔄</span> Recarregar
-                                </button>
-                            </div>
-                            <div id="equipamentos-list" class="items-list"></div>
-                        </div>
-                    </div>
-
-                    <!-- LISTAGEM ORDENS -->
-                    <div id="listagem-ordens" class="listagem-content">
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>📋 Ordens de Serviço Abertas</h2>
-                                <button type="button" class="btn btn-secondary" onclick="recarregarOrdens()">
-                                    <span class="icon">🔄</span> Recarregar
-                                </button>
-                            </div>
-                            <div id="ordens-list" class="items-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <!-- TAB: ORDENS - Visualizar Ordens -->
             <section id="ordens-tab" class="tab-content">
                 <div class="section-card">
                     <div class="section-header">
                         <h2>📋 Ordens de Serviço</h2>
-                        <button type="button" class="btn btn-secondary" onclick="recarregarOrdens()">
+                        <button type="button" id="btn-recarregar-ordens" class="btn btn-secondary">
                             <span class="icon">🔄</span> Recarregar
                         </button>
                     </div>
-                    <div id="ordens-list-page" class="items-list"></div>
+                    <div class="filter-section" style="margin-bottom: 12px;">
+                        <label for="filtro-status">Filtrar por Status:</label>
+                        <select id="filtro-status" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="ABERTA">Aberta</option>
+                            <option value="EM_ANDAMENTO">Em Andamento</option>
+                            <option value="CONCLUIDA">Concluída</option>
+                            <option value="CANCELADA">Cancelada</option>
+                        </select>
+                    </div>
+                    <div id="ordens-list" class="items-list"></div>
                 </div>
             </section>
 

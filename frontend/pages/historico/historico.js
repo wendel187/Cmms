@@ -2,6 +2,7 @@
 
 import { carregarHistoricoOS } from '../../js/services/historicoService.js';
 import { mostrarToast } from '../../js/utils.js';
+import { API_BASE_URL } from '../../js/config.js';
 
 // Elementos do DOM
 const formBuscar = document.getElementById('form-buscar-historico');
@@ -22,18 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== VERIFICAR CONEXÃO ====================
 async function verificarConexao() {
-    const badgeEl = document.getElementById('status-conexao');
-    if (!badgeEl) return;
-
     try {
-        const response = await fetch('http://localhost:8080/actuator/health');
-        const conectado = response.ok;
-        badgeEl.textContent = conectado ? '🟢 Conectado' : '🔴 Erro na conexão';
+        const response = await fetch(`${API_BASE_URL}/tecnicos`);
+        return response.ok;
     } catch (error) {
         console.error('Erro ao verificar conexão:', error);
-        badgeEl.textContent = '🔴 Desconectado';
-    } finally {
-        badgeEl.classList.remove('loading');
+        return false;
     }
 }
 
@@ -180,13 +175,4 @@ function mostrarFeedback(elemento, mensagem, tipo) {
     elemento.className = `feedback show ${tipo}`;
 }
 
-// ==================== VERIFICAR CONEXÃO BACKEND ====================
-async function verificarConexaoBackend() {
-    try {
-        const response = await fetch('http://localhost:8080/actuator/health');
-        return response.ok;
-    } catch {
-        return false;
-    }
-}
 

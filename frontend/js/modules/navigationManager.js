@@ -1,9 +1,9 @@
-// ==================== GERENCIADOR DE NAVEGAÇÃO ====================
-// Responsabilidade: Controlar mudança de abas, listagens e tipos de OS
+/* ==================== GERENCIADOR DE NAVEGAÇÃO ====================
+ Responsabilidade: Controlar mudança de abas, listagens e tipos de OS */
 
-import { API_BASE_URL } from './config.js';
+import { API_BASE_URL } from '../config.js';
 
-/**
+/*
  * Mapeamento de abas dinâmicas com suas ações de carregamento
  */
 const TAB_HANDLERS = {
@@ -88,6 +88,12 @@ let carregarEquipamentosPage = () => {};
 let carregarOrdensPage = () => {};
 let carregarTecnicos = () => {};
 let carregarOrdens = () => {};
+let carregarHistoricoOS = () => {};
+
+/**
+ * Configurar funções de carregamento para as abas
+ * @param {Object} handlers - Objeto com as funções de carregamento
+ */
 
 export function setCarregadores(handlers) {
     carregarTecnicosPage = handlers.carregarTecnicosPage;
@@ -95,5 +101,6 @@ export function setCarregadores(handlers) {
     carregarOrdensPage = handlers.carregarOrdensPage;
     carregarTecnicos = handlers.carregarTecnicos;
     carregarOrdens = handlers.carregarOrdens;
+    carregarHistoricoOS = handlers.carregarHistoricoOS;
 }
 

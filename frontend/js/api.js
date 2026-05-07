@@ -29,6 +29,10 @@ async function fazerRequisicao(endpoint, method = 'GET', dados = null) {
             throw new Error(`Erro ${resposta.status}: ${resposta.statusText}`);
         }
 
+        if (resposta.status === 204 || resposta.headers.get('content-length') === '0') {
+            return null;
+        }
+
         return await resposta.json();
     } catch (erro) {
         console.error(`Erro na requisição ${method} ${endpoint}:`, erro);
@@ -87,7 +91,7 @@ export async function criarTecnico(dados) {
  * @returns {Promise<Object>}
  */
 export async function atualizarTecnico(tecnicoId, dados) {
-    return await fazerRequisicao(API_ENDPOINTS.tecnico(tecnicoId), 'PUT', dados);
+    return await fazerRequisicao(API_ENDPOINTS.tecnicos, 'PUT', { id: tecnicoId, ...dados });
 }
 
 // ==================== EQUIPAMENTOS ====================
@@ -126,8 +130,12 @@ export async function criarEquipamento(dados) {
  * @param {Object} dados - Dados a atualizar (deve incluir 'id')
  * @returns {Promise<Object>}
  */
-export async function atualizarEquipamento(dados) {
-    return await fazerRequisicao(API_ENDPOINTS.equipamentos, 'PUT', dados);
+export async function atualizarEquipamento(id, dados) {
+    return await fazerRequisicao(API_ENDPOINTS.equipamentos, 'PUT', { id, ...dados });
+}
+
+export async function deletarEquipamento(id) {
+    return await fazerRequisicao(API_ENDPOINTS.equipamento(id), 'DELETE');
 }
 
 // ==================== ORDENS DE SERVIÇO ====================
@@ -138,6 +146,13 @@ export async function atualizarEquipamento(dados) {
  */
 export async function carregarOrdensAbertas() {
     return await fazerRequisicao(API_ENDPOINTS.ordensAbertas);
+}
+
+export async function carregarTodasOrdens() {
+    const resposta = await fazerRequisicao(
+        `${API_ENDPOINTS.ordens}?page=${PAGINATION.PAGE}&size=${PAGINATION.SIZE}`
+    );
+    return resposta.content || [];
 }
 
 /**

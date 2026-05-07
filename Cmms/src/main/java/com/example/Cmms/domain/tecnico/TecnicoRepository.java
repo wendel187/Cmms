@@ -13,10 +13,20 @@ public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
     
     Page<Tecnico> findByAtivoTrue(Pageable pageable);
     
+    Page<Tecnico> findByAtivo(boolean ativo, Pageable pageable);
+    
     Page<Tecnico> findByStatus(StatusTecnico status, Pageable pageable);
+    
+    Page<Tecnico> findByStatusAndAtivo(StatusTecnico status, boolean ativo, Pageable pageable);
+    
+    Page<Tecnico> findBySetorAndAtivo(String setor, boolean ativo, Pageable pageable);
     
     List<Tecnico> findBySetorAndAtivoTrue(String setor);
     
+    List<Tecnico> findByAtivoAndStatusIn(boolean ativo, List<StatusTecnico> statuses);
+    
     Optional<Tecnico> findByEmailAndAtivoTrue(String email);
+    
+    long countByAtivo(boolean ativo);
 }
 

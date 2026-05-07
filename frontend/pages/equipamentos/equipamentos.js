@@ -1,6 +1,6 @@
 // ==================== EQUIPAMENTOS PAGE ====================
 
-import { carregarEquipamentos, carregarEquipamento, atualizarEquipamento } from '../../js/api.js';
+import { carregarEquipamentos, carregarEquipamento, atualizarEquipamento, deletarEquipamento as deletarEquipamentoAPI } from '../../js/api.js';
 import { mostrarToast } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
@@ -10,7 +10,7 @@ import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecha
 export function inicializarEquipamentos() {
     const btnRecarregar = document.getElementById('btn-recarregar-equipamentos');
     if (btnRecarregar) {
-        btnRecarregar.addEventListener('click', recarregarEquipamentos);
+        btnRecarregar.onclick = recarregarEquipamentos;
     }
     carregarEquipamentosPage();
 }
@@ -150,7 +150,7 @@ async function salvarEquipamento(id, nomesCampos) {
         // Remover campo id antes de enviar
         delete valores.id;
 
-        await atualizarEquipamento(valores);
+        await atualizarEquipamento(id, valores);
         mostrarToast('✅ Equipamento atualizado com sucesso!', 'success');
         fecharModal();
         await recarregarEquipamentos();
@@ -163,10 +163,15 @@ async function salvarEquipamento(id, nomesCampos) {
 /**
  * Deletar equipamento (stub - implementar no futuro)
  */
-function deletarEquipamento(id) {
-    if (confirm('Tem certeza que deseja deletar este equipamento?')) {
-        mostrarToast(`Deletar equipamento ${id}`, 'info');
-        // TODO: Implementar deleção
+async function deletarEquipamento(id) {
+    if (!confirm('Tem certeza que deseja deletar este equipamento?')) return;
+    try {
+        await deletarEquipamentoAPI(id);
+        mostrarToast('✅ Equipamento deletado com sucesso!', 'success');
+        await recarregarEquipamentos();
+    } catch (error) {
+        console.error('Erro ao deletar equipamento:', error);
+        mostrarToast('❌ Erro ao deletar equipamento', 'error');
     }
 }
 
