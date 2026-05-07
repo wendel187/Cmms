@@ -103,7 +103,8 @@ export async function criarTecnico(dados) {
 }
 
 export async function atualizarTecnico(id, dados) {
-    return put('/tecnico', { id, ...dados });
+    console.log(`🔄 Enviando PUT para /tecnico/${id}`, { id, dados });
+    return put(`/tecnico/${id}`, dados);
 }
 
 export async function deletarTecnico(id) {
@@ -130,7 +131,8 @@ export async function criarEquipamento(dados) {
 }
 
 export async function atualizarEquipamento(id, dados) {
-    return put('/equipamento', { id, ...dados });
+    console.log(`🔄 Enviando PUT para /equipamento/${id}`, { id, dados });
+    return put(`/equipamento/${id}`, dados);
 }
 
 export async function deletarEquipamento(id) {
@@ -168,7 +170,8 @@ export async function atualizarStatusOS(id, novoStatus, observacoes = '') {
 }
 
 export async function atualizarOS(id, dados) {
-    return put(`/ordens-servico/${id}`, { id, ...dados });
+    console.log(`🔄 Enviando PUT para /ordens-servico/${id}`, { id, dados });
+    return put(`/ordens-servico/${id}`, dados);
 }
 
 export async function deletarOrdem(id) {

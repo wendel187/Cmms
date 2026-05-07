@@ -28,6 +28,7 @@ import {
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Aplicação iniciada...');
     await verificarConexao();
     inicializarEventos();
 
@@ -48,6 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         carregarEquipamentos(),
         carregarOrdens()
     ]);
+
+    console.log('✅ Inicialização completa');
 });
 
 
@@ -69,6 +72,7 @@ async function verificarConexao() {
 
 // ==================== EVENTOS ====================
 function inicializarEventos() {
+    console.log('🔗 Inicializando event listeners...');
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -101,8 +105,24 @@ function inicializarEventos() {
     document.getElementById('form-os-preventiva')?.addEventListener('submit', criarOSPreventiva);
 
     // update
-    document.getElementById('form-atualizar-tecnico')?.addEventListener('submit', atualizarTecnico);
-    document.getElementById('form-atualizar-os')?.addEventListener('submit', atualizarOS);
+    const formAtualizarTecnico = document.getElementById('form-atualizar-tecnico');
+    const formAtualizarOS = document.getElementById('form-atualizar-os');
+    
+    if (formAtualizarTecnico) {
+        console.log('✅ Formulário "Atualizar Técnico" encontrado');
+        formAtualizarTecnico.addEventListener('submit', atualizarTecnico);
+    } else {
+        console.warn('❌ Formulário "Atualizar Técnico" NÃO encontrado');
+    }
+    
+    if (formAtualizarOS) {
+        console.log('✅ Formulário "Atualizar OS" encontrado');
+        formAtualizarOS.addEventListener('submit', atualizarOS);
+    } else {
+        console.warn('❌ Formulário "Atualizar OS" NÃO encontrado');
+    }
+    
+    console.log('✅ Event listeners inicializados');
 }
 
 
@@ -280,8 +300,18 @@ function atualizarSelectOS(ordens) {
 // ==================== ATUALIZAÇÃO TECNICO ====================
 async function atualizarTecnico(e) {
     e.preventDefault();
+    console.log('📝 Atualizando técnico...');
 
-    const id = obterValor('atualizar-tecnico-id');
+    const idValue = obterValor('atualizar-tecnico-id');
+    const id = parseInt(idValue);
+
+    console.log('ID obtido:', { idValue, id });
+
+    if (!id || id === 0 || isNaN(id)) {
+        console.warn('❌ ID inválido:', id);
+        mostrarToast('❌ Selecione um técnico primeiro', 'error');
+        return;
+    }
 
     const dados = {
         nome: obterValor('atualizar-tecnico-nome'),
@@ -292,12 +322,38 @@ async function atualizarTecnico(e) {
         status: obterValor('atualizar-tecnico-status')
     };
 
+    console.log('📦 Dados a enviar:', { id, dados });
+
+    // Validar campos vazios
+    for (let [chave, valor] of Object.entries(dados)) {
+        if (!valor || valor.trim() === '') {
+            console.warn(`❌ Campo vazio: ${chave}`);
+            mostrarToast(`❌ Campo "${chave}" não pode estar vazio`, 'error');
+            return;
+        }
+    }
+
     try {
+        mostrarToast('⏳ Salvando técnico...', 'info');
+        console.log('🔄 Chamando API...');
+        
         await atualizarTecnicoAPI(id, dados);
-        mostrarToast('✅ Técnico atualizado!', 'success');
+        
+        console.log('✅ Técnico atualizado com sucesso!');
+        mostrarToast('✅ Técnico atualizado com sucesso!', 'success');
+        
+        // Desabilitar campos após sucesso
+        cancelarEdicaoTecnico();
+        
+        // Recarregar dados
+        console.log('🔄 Recarregando lista de técnicos...');
         await carregarTecnicos();
-    } catch {
-        mostrarToast('❌ Erro ao atualizar técnico', 'error');
+        
+        console.log('✅ Fluxo completo concluído');
+    } catch (error) {
+        console.error('❌ Erro detalhado:', error);
+        console.error('❌ Stack:', error.stack);
+        mostrarToast(`❌ Erro ao atualizar técnico: ${error.message}`, 'error');
     }
 }
 
@@ -306,10 +362,15 @@ async function atualizarTecnico(e) {
 async function atualizarOS(e) {
     e.preventDefault();
 
-    const id = document.getElementById('atualizar-os-id').value;
+    const id = parseInt(document.getElementById('atualizar-os-id').value);
+
+    if (!id) {
+        mostrarToast('❌ Selecione uma OS primeiro', 'error');
+        return;
+    }
 
     const dados = {
-        id: parseInt(id),
+        id: id,
         novoStatus: document.getElementById('atualizar-os-status').value,
         observacoes: document.getElementById('atualizar-os-descricao').value
     };
@@ -322,13 +383,20 @@ async function atualizarOS(e) {
         });
 
         if (res.ok) {
-            mostrarToast('✅ OS atualizada!', 'success');
+            mostrarToast('✅ OS atualizada com sucesso!', 'success');
+            
+            // Desabilitar campos após sucesso
+            cancelarEdicaoOS();
+            
+            // Recarregar dados
             await carregarOrdens();
         } else {
-            mostrarToast(await res.text(), 'error');
+            const errorMsg = await res.text();
+            mostrarToast(`❌ Erro: ${errorMsg || 'Falha ao atualizar OS'}`, 'error');
         }
-    } catch {
-        mostrarToast('❌ Erro ao atualizar OS', 'error');
+    } catch (error) {
+        console.error('Erro ao atualizar OS:', error);
+        mostrarToast(`❌ Erro ao atualizar OS: ${error.message}`, 'error');
     }
 }
 
@@ -349,32 +417,66 @@ async function deletarOSConfirmada(id) {
 
 // ==================== MODO EDIÇÃO ====================
 function ativarEdicaoTecnico() {
-    ['nome','email','telefone','especialidade','setor','status']
-        .forEach(f => {
-            document.getElementById(`atualizar-tecnico-${f}`).disabled = false;
-        });
+    console.log('✏️ Ativando modo edição de técnico...');
+    const container = document.getElementById('tecnico-form-container');
+    if (!container) {
+        console.warn('⚠️ Container não encontrado');
+        return;
+    }
 
-    document.getElementById('btn-editar-tecnico').style.display = 'none';
-    document.getElementById('btn-salvar-tecnico').style.display = 'inline-block';
-    document.getElementById('btn-cancelar-tecnico').style.display = 'inline-block';
+    const campos = ['nome', 'email', 'telefone', 'especialidade', 'setor', 'status'];
+    
+    campos.forEach(f => {
+        const input = document.getElementById(`atualizar-tecnico-${f}`);
+        if (input) {
+            input.disabled = false;
+            console.log(`  ✅ Campo habilitado: atualizar-tecnico-${f}`);
+        } else {
+            console.warn(`  ❌ Campo não encontrado: atualizar-tecnico-${f}`);
+        }
+    });
+
+    const btnEditar = document.getElementById('btn-editar-tecnico');
+    const btnSalvar = document.getElementById('btn-salvar-tecnico');
+    const btnCancelar = document.getElementById('btn-cancelar-tecnico');
+    
+    if (btnEditar) btnEditar.style.display = 'none';
+    if (btnSalvar) btnSalvar.style.display = 'inline-block';
+    if (btnCancelar) btnCancelar.style.display = 'inline-block';
+    
+    console.log('✅ Modo edição ativado');
 }
 
 function cancelarEdicaoTecnico() {
-    ['nome','email','telefone','especialidade','setor','status']
-        .forEach(f => {
-            document.getElementById(`atualizar-tecnico-${f}`).disabled = true;
-        });
+    console.log('❌ Cancelando edição de técnico...');
+    const campos = ['nome', 'email', 'telefone', 'especialidade', 'setor', 'status'];
+    
+    campos.forEach(f => {
+        const input = document.getElementById(`atualizar-tecnico-${f}`);
+        if (input) input.disabled = true;
+    });
 
-    document.getElementById('btn-editar-tecnico').style.display = 'inline-block';
-    document.getElementById('btn-salvar-tecnico').style.display = 'none';
-    document.getElementById('btn-cancelar-tecnico').style.display = 'none';
+    const btnEditar = document.getElementById('btn-editar-tecnico');
+    const btnSalvar = document.getElementById('btn-salvar-tecnico');
+    const btnCancelar = document.getElementById('btn-cancelar-tecnico');
+    
+    if (btnEditar) btnEditar.style.display = 'inline-block';
+    if (btnSalvar) btnSalvar.style.display = 'none';
+    if (btnCancelar) btnCancelar.style.display = 'none';
+    
+    console.log('✅ Edição cancelada');
 }
 
 function ativarEdicaoOS() {
-    ['status','tecnico','descricao','setor','data-conclusao']
-        .forEach(f => {
-            document.getElementById(`atualizar-os-${f}`).disabled = false;
-        });
+    const container = document.getElementById('os-form-container');
+    if (!container) return;
+
+    const campos = ['status', 'tecnico', 'descricao', 'setor', 'data-conclusao'];
+    
+    campos.forEach(f => {
+        const input = document.getElementById(`atualizar-os-${f}`);
+        if (input) input.disabled = false;
+    });
 
     document.getElementById('btn-editar-os').style.display = 'none';
     document.getElementById('btn-salvar-os').style.display = 'inline-block';
@@ -382,10 +484,12 @@ function ativarEdicaoOS() {
 }
 
 function cancelarEdicaoOS() {
-    ['status','tecnico','descricao','setor','data-conclusao']
-        .forEach(f => {
-            document.getElementById(`atualizar-os-${f}`).disabled = true;
-        });
+    const campos = ['status', 'tecnico', 'descricao', 'setor', 'data-conclusao'];
+    
+    campos.forEach(f => {
+        const input = document.getElementById(`atualizar-os-${f}`);
+        if (input) input.disabled = true;
+    });
 
     document.getElementById('btn-editar-os').style.display = 'inline-block';
     document.getElementById('btn-salvar-os').style.display = 'none';
@@ -395,19 +499,41 @@ function cancelarEdicaoOS() {
 
 // ==================== CARREGAR DADOS PARA EDIÇÃO ====================
 async function carregarDadosTecnico(id) {
-    if (!id) return;
+    if (!id) {
+        console.warn('⚠️ Nenhum técnico selecionado');
+        return;
+    }
+    
+    console.log('📥 Carregando dados do técnico:', id);
+    
     try {
         const tecnico = await buscarTecnico(id);
+        console.log('📦 Dados recebidos:', tecnico);
+        
+        // Preencher campos
         document.getElementById('atualizar-tecnico-nome').value = tecnico.nome || '';
         document.getElementById('atualizar-tecnico-email').value = tecnico.email || '';
         document.getElementById('atualizar-tecnico-telefone').value = tecnico.telefone || '';
         document.getElementById('atualizar-tecnico-especialidade').value = tecnico.especialidade || '';
         document.getElementById('atualizar-tecnico-setor').value = tecnico.setor || '';
         document.getElementById('atualizar-tecnico-status').value = tecnico.status || '';
+        
+        console.log('✅ Campos preenchidos');
+        
+        // Mostrar formulário de edição
         const container = document.getElementById('tecnico-form-container');
-        if (container) container.style.display = 'block';
-    } catch {
-        mostrarToast('❌ Erro ao carregar dados do técnico', 'error');
+        if (container) {
+            container.style.display = 'block';
+            console.log('✅ Formulário exibido');
+        }
+        
+        // Garantir que campos comecem desabilitados
+        cancelarEdicaoTecnico();
+        
+        mostrarToast('✅ Técnico carregado. Clique em "Editar" para modificar', 'info');
+    } catch (error) {
+        console.error('❌ Erro ao carregar técnico:', error);
+        mostrarToast(`❌ Erro ao carregar dados do técnico: ${error.message}`, 'error');
     }
 }
 
@@ -415,18 +541,29 @@ async function carregarDadosOS(id) {
     if (!id) return;
     try {
         const ordem = await buscarOrdem(id);
+        
+        // Preencher campos
         document.getElementById('atualizar-os-status').value = ordem.status || '';
         document.getElementById('atualizar-os-tecnico').value = ordem.tecnico?.id || '';
         document.getElementById('atualizar-os-descricao').value = ordem.descricao || '';
         document.getElementById('atualizar-os-setor').value = ordem.setor || '';
+        
         const dataConclusao = document.getElementById('atualizar-os-data-conclusao');
         if (dataConclusao && ordem.dataConclusao) {
             dataConclusao.value = ordem.dataConclusao.split('T')[0];
         }
+        
+        // Mostrar formulário de edição
         const container = document.getElementById('os-form-container');
         if (container) container.style.display = 'block';
-    } catch {
-        mostrarToast('❌ Erro ao carregar dados da OS', 'error');
+        
+        // Garantir que campos comecem desabilitados
+        cancelarEdicaoOS();
+        
+        mostrarToast('✅ OS carregada. Clique em "Editar" para modificar', 'info');
+    } catch (error) {
+        console.error('Erro ao carregar OS:', error);
+        mostrarToast(`❌ Erro ao carregar dados da OS: ${error.message}`, 'error');
     }
 }
 
