@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
     ordem: (id) => `/ordens-servico/${id}`,
     ordemCorretiva: '/ordens-servico/corretiva',
     ordemPreventiva: '/ordens-servico/preventiva',
+    ordensPorStatus: (status, page, size) => `/ordens-servico/status/${status}?page=${page}&size=${size}`,
     
     // Health check
     health: '/actuator/health'
