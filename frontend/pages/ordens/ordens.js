@@ -1,7 +1,7 @@
 // ==================== ORDENS PAGE ====================
 
 import { carregarTodasOrdens, carregarOrdem, atualizarOS, cancelarOrdemServico } from '../../js/api.js';
-import { mostrarToast } from '../../js/utils.js';
+import { mostrarToast, formatarData } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
 let ordensGlobal = [];
@@ -262,15 +262,6 @@ async function deletarOrdem(id) {
         console.error('Erro ao cancelar ordem:', error);
         mostrarToast('❌ Erro ao cancelar ordem', 'error');
     }
-}
-
-/**
- * Formatar data para exibição
- */
-function formatarData(data) {
-    if (!data) return 'N/A';
-    const d = new Date(data);
-    return d.toLocaleDateString('pt-BR');
 }
 
 // Expor funções globais

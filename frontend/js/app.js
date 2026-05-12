@@ -1,6 +1,3 @@
-// ==================== IMPORTAÇÕES ====================
-import { API_BASE_URL } from './config.js';
-
 import { inicializarTecnicos } from '../pages/tecnicos/tecnicos.js';
 import { inicializarEquipamentos } from '../pages/equipamentos/equipamentos.js';
 import { inicializarOrdens } from '../pages/ordens/ordens.js';
@@ -8,27 +5,27 @@ import { inicializarOrdens } from '../pages/ordens/ordens.js';
 import { ativarAba, ativarListagem, ativarTipoOS, setCarregadores } from './modules/navigationManager.js';
 
 import {
-    buscarTecnicos,
-    buscarEquipamentos,
-    buscarOrdensAbertas,
-    buscarTecnico,
-    buscarOrdem,
-    verificarConexaoBackend,
+    verificarConexao as verificarConexaoAPI,
+    carregarTecnicos as buscarTecnicos,
+    carregarEquipamentos as buscarEquipamentos,
+    carregarOrdensAbertas as buscarOrdensAbertas,
+    carregarTecnico as buscarTecnico,
+    carregarOrdem as buscarOrdem,
     criarTecnico,
     criarEquipamento,
-    atualizarTecnico as atualizarTecnicoAPI
-} from './modules/apiClient.js';
+    criarOSCorretiva as criarOSCorretivaAPI,
+    criarOSPreventiva as criarOSPreventivaAPI,
+    atualizarTecnico as atualizarTecnicoAPI,
+    atualizarStatusOS,
+    desativarTecnico,
+    cancelarOrdemServico
+} from './api.js';
 
-import {
-    mostrarToast,
-    obterValor,
-    limparFormulario
-} from './utils.js';
+import { mostrarToast, obterValor, limparFormulario } from './utils.js';
 
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Aplicação iniciada...');
     await verificarConexao();
     inicializarEventos();
 
@@ -40,17 +37,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         carregarTecnicosPage: inicializarTecnicos,
         carregarEquipamentosPage: inicializarEquipamentos,
         carregarOrdensPage: inicializarOrdens,
-        carregarTecnicos: carregarTecnicos,
-        carregarOrdens: carregarOrdens
+        carregarTecnicos,
+        carregarOrdens
     });
 
-    await Promise.all([
-        carregarTecnicos(),
-        carregarEquipamentos(),
-        carregarOrdens()
-    ]);
-
-    console.log('✅ Inicialização completa');
+    await Promise.all([carregarTecnicos(), carregarEquipamentos(), carregarOrdens()]);
 });
 
 
@@ -58,9 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function verificarConexao() {
     const badgeEl = document.getElementById('status-conexao');
     if (!badgeEl) return;
-
     try {
-        const conectado = await verificarConexaoBackend();
+        const conectado = await verificarConexaoAPI();
         badgeEl.textContent = conectado ? '🟢 Conectado' : '🔴 Erro na conexão';
     } catch {
         badgeEl.textContent = '🔴 Desconectado';
@@ -72,8 +62,6 @@ async function verificarConexao() {
 
 // ==================== EVENTOS ====================
 function inicializarEventos() {
-    console.log('🔗 Inicializando event listeners...');
-
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.id === 'btn-historico') {
@@ -85,51 +73,28 @@ function inicializarEventos() {
     });
 
     document.querySelectorAll('.listagem-btn').forEach(btn => {
-        btn.addEventListener('click', (e) =>
-            ativarListagem(btn.dataset.listagem, e)
-        );
+        btn.addEventListener('click', (e) => ativarListagem(btn.dataset.listagem, e));
     });
 
     document.querySelectorAll('.tipo-btn').forEach(btn => {
-        btn.addEventListener('click', (e) =>
-            ativarTipoOS(btn.dataset.tipo, e)
-        );
+        btn.addEventListener('click', (e) => ativarTipoOS(btn.dataset.tipo, e));
     });
 
-    // forms básicos
     document.getElementById('form-tecnico')?.addEventListener('submit', cadastrarTecnico);
     document.getElementById('form-equipamento')?.addEventListener('submit', cadastrarEquipamento);
-
-    // OS
-    document.getElementById('form-os-corretiva')?.addEventListener('submit', criarOSCorretiva);
-    document.getElementById('form-os-preventiva')?.addEventListener('submit', criarOSPreventiva);
-
-    // update
-    const formAtualizarTecnico = document.getElementById('form-atualizar-tecnico');
-    const formAtualizarOS = document.getElementById('form-atualizar-os');
-    
-    if (formAtualizarTecnico) {
-        console.log('✅ Formulário "Atualizar Técnico" encontrado');
-        formAtualizarTecnico.addEventListener('submit', atualizarTecnico);
-    } else {
-        console.warn('❌ Formulário "Atualizar Técnico" NÃO encontrado');
-    }
-    
-    if (formAtualizarOS) {
-        console.log('✅ Formulário "Atualizar OS" encontrado');
-        formAtualizarOS.addEventListener('submit', atualizarOS);
-    } else {
-        console.warn('❌ Formulário "Atualizar OS" NÃO encontrado');
-    }
-    
-    console.log('✅ Event listeners inicializados');
+    document.getElementById('form-os-corretiva')?.addEventListener('submit', submitOSCorretiva);
+    document.getElementById('form-os-preventiva')?.addEventListener('submit', submitOSPreventiva);
+    document.getElementById('form-atualizar-tecnico')?.addEventListener('submit', submitAtualizarTecnico);
+    document.getElementById('form-atualizar-os')?.addEventListener('submit', submitAtualizarOS);
+    document.getElementById('btn-recarregar-tecnicos')?.addEventListener('click', carregarTecnicos);
+    document.getElementById('btn-recarregar-equipamentos')?.addEventListener('click', carregarEquipamentos);
+    document.getElementById('btn-recarregar-ordens')?.addEventListener('click', carregarOrdens);
 }
 
 
-// ==================== CADASTROS ====================
+// ==================== CADASTRAR ====================
 async function cadastrarTecnico(e) {
     e.preventDefault();
-
     const dados = {
         nome: obterValor('tecnico-nome'),
         email: obterValor('tecnico-email'),
@@ -138,7 +103,6 @@ async function cadastrarTecnico(e) {
         setor: obterValor('tecnico-setor'),
         status: obterValor('tecnico-status')
     };
-
     try {
         await criarTecnico(dados);
         mostrarToast('✅ Técnico cadastrado!', 'success');
@@ -151,7 +115,6 @@ async function cadastrarTecnico(e) {
 
 async function cadastrarEquipamento(e) {
     e.preventDefault();
-
     const dados = {
         nome: obterValor('equip-nome'),
         codigo: obterValor('equip-codigo'),
@@ -159,7 +122,6 @@ async function cadastrarEquipamento(e) {
         status: obterValor('equip-status'),
         criticidade: obterValor('equip-criticidade')
     };
-
     try {
         await criarEquipamento(dados);
         mostrarToast('✅ Equipamento cadastrado!', 'success');
@@ -171,44 +133,30 @@ async function cadastrarEquipamento(e) {
 }
 
 
-// ==================== OS CORRETIVA ====================
-async function criarOSCorretiva(e) {
+// ==================== CRIAR OS ====================
+async function submitOSCorretiva(e) {
     e.preventDefault();
-
     const dados = {
-        equipamentoId: parseInt(document.getElementById('corr-equipamento').value),
-        tecnicoId: parseInt(document.getElementById('corr-tecnico').value),
-        descricao: document.getElementById('corr-descricao').value,
-        descricaoFalha: document.getElementById('corr-falha').value,
-        setor: document.getElementById('corr-setor').value,
-        nivelCriticidade: parseInt(document.getElementById('corr-criticidade').value),
+        equipamentoId: parseInt(obterValor('corr-equipamento')),
+        tecnicoId: parseInt(obterValor('corr-tecnico')),
+        descricao: obterValor('corr-descricao'),
+        descricaoFalha: obterValor('corr-falha'),
+        setor: obterValor('corr-setor'),
+        nivelCriticidade: parseInt(obterValor('corr-criticidade')),
         falhaTotal: document.getElementById('corr-falha-total')?.checked || false
     };
-
     try {
-        const res = await fetch(`${API_BASE_URL}/ordens-servico/corretiva`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        if (res.ok) {
-            mostrarToast('✅ OS Corretiva criada!', 'success');
-            e.target.reset();
-            await carregarOrdens();
-        } else {
-            mostrarToast(await res.text(), 'error');
-        }
-    } catch {
-        mostrarToast('❌ Erro ao criar OS', 'error');
+        await criarOSCorretivaAPI(dados);
+        mostrarToast('✅ OS Corretiva criada!', 'success');
+        e.target.reset();
+        await carregarOrdens();
+    } catch (error) {
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
 }
 
-
-// ==================== OS PREVENTIVA ====================
-async function criarOSPreventiva(e) {
+async function submitOSPreventiva(e) {
     e.preventDefault();
-
     const dados = {
         equipamentoId: parseInt(obterValor('prev-equipamento')),
         tecnicoId: parseInt(obterValor('prev-tecnico')),
@@ -218,100 +166,87 @@ async function criarOSPreventiva(e) {
         periodicidadeDias: parseInt(obterValor('prev-periodicidade')),
         ultimaManutencao: obterValor('prev-ultima-manutencao') || null
     };
-
     try {
-        const res = await fetch(`${API_BASE_URL}/ordens-servico/preventiva`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        if (res.ok) {
-            mostrarToast('✅ OS Preventiva criada!', 'success');
-            limparFormulario('form-os-preventiva');
-            await carregarOrdens();
-        } else {
-            mostrarToast(await res.text(), 'error');
-        }
-    } catch {
-        mostrarToast('❌ Erro ao criar OS', 'error');
+        await criarOSPreventivaAPI(dados);
+        mostrarToast('✅ OS Preventiva criada!', 'success');
+        limparFormulario('form-os-preventiva');
+        await carregarOrdens();
+    } catch (error) {
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
 }
 
 
 // ==================== CARREGAMENTOS ====================
 async function carregarTecnicos() {
-    const tecnicos = await buscarTecnicos();
+    const tecnicos = await buscarTecnicos().catch(() => []);
     atualizarSelectTecnicos(tecnicos);
 }
 
 async function carregarEquipamentos() {
-    const equipamentos = await buscarEquipamentos();
+    const equipamentos = await buscarEquipamentos().catch(() => []);
     atualizarSelectEquipamentos(equipamentos);
 }
 
 async function carregarOrdens() {
-    const ordens = await buscarOrdensAbertas();
+    const ordens = await buscarOrdensAbertas().catch(() => []);
     atualizarSelectOS(ordens);
 }
 
 
 // ==================== SELECTS ====================
 function atualizarSelectTecnicos(tecnicos) {
-    ['corr-tecnico', 'prev-tecnico', 'atualizar-tecnico-id', 'atualizar-os-tecnico']
-        .forEach(id => {
-            const select = document.getElementById(id);
-            if (!select) return;
-
-            select.innerHTML =
-                '<option value="">Selecionar...</option>' +
-                tecnicos.map(t =>
-                    `<option value="${t.id}">${t.nome}</option>`
-                ).join('');
-        });
+    const opcoes = '<option value="">Selecionar...</option>' +
+        tecnicos.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+    ['corr-tecnico', 'prev-tecnico', 'atualizar-tecnico-id', 'atualizar-os-tecnico'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = opcoes;
+    });
 }
 
 function atualizarSelectEquipamentos(equipamentos) {
-    ['corr-equipamento', 'prev-equipamento']
-        .forEach(id => {
-            const select = document.getElementById(id);
-            if (!select) return;
-
-            select.innerHTML =
-                '<option value="">Selecionar...</option>' +
-                equipamentos.map(e =>
-                    `<option value="${e.id}">${e.nome}</option>`
-                ).join('');
-        });
+    const opcoes = '<option value="">Selecionar...</option>' +
+        equipamentos.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+    ['corr-equipamento', 'prev-equipamento'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = opcoes;
+    });
 }
 
 function atualizarSelectOS(ordens) {
     const select = document.getElementById('atualizar-os-id');
     if (!select) return;
-
-    select.innerHTML =
-        '<option value="">Selecionar...</option>' +
-        ordens.map(o =>
-            `<option value="${o.id}">OS #${o.id}</option>`
-        ).join('');
+    select.innerHTML = '<option value="">Selecionar...</option>' +
+        ordens.map(o => `<option value="${o.id}">OS #${o.id}</option>`).join('');
 }
 
 
-// ==================== ATUALIZAÇÃO TECNICO ====================
-async function atualizarTecnico(e) {
+// ==================== MODO EDIÇÃO ====================
+function setEditMode(prefixo, campos, editing) {
+    campos.forEach(f => {
+        const el = document.getElementById(`${prefixo}-${f}`);
+        if (el) el.disabled = !editing;
+    });
+    const suffix      = prefixo.replace('atualizar-', '');
+    const btnEditar   = document.getElementById(`btn-editar-${suffix}`);
+    const btnSalvar   = document.getElementById(`btn-salvar-${suffix}`);
+    const btnCancelar = document.getElementById(`btn-cancelar-${suffix}`);
+    if (btnEditar)   btnEditar.classList.toggle('hidden', editing);
+    if (btnSalvar)   btnSalvar.classList.toggle('hidden', !editing);
+    if (btnCancelar) btnCancelar.classList.toggle('hidden', !editing);
+}
+
+function ativarEdicaoTecnico()  { setEditMode('atualizar-tecnico', ['nome','email','telefone','especialidade','setor','status'], true); }
+function cancelarEdicaoTecnico() { setEditMode('atualizar-tecnico', ['nome','email','telefone','especialidade','setor','status'], false); }
+function ativarEdicaoOS()  { setEditMode('atualizar-os', ['status','tecnico','descricao','setor','data-conclusao'], true); }
+function cancelarEdicaoOS() { setEditMode('atualizar-os', ['status','tecnico','descricao','setor','data-conclusao'], false); }
+
+
+// ==================== ATUALIZAR TÉCNICO ====================
+async function submitAtualizarTecnico(e) {
     e.preventDefault();
-    console.log('📝 Atualizando técnico...');
-
-    const idValue = obterValor('atualizar-tecnico-id');
-    const id = parseInt(idValue);
-
-    console.log('ID obtido:', { idValue, id });
-
-    if (!id || id === 0 || isNaN(id)) {
-        console.warn('❌ ID inválido:', id);
-        mostrarToast('❌ Selecione um técnico primeiro', 'error');
-        return;
-    }
+    const id = parseInt(obterValor('atualizar-tecnico-id'));
+    if (!id || isNaN(id)) { mostrarToast('❌ Selecione um técnico primeiro', 'error'); return; }
 
     const dados = {
         nome: obterValor('atualizar-tecnico-nome'),
@@ -322,218 +257,59 @@ async function atualizarTecnico(e) {
         status: obterValor('atualizar-tecnico-status')
     };
 
-    console.log('📦 Dados a enviar:', { id, dados });
-
-    // Validar campos vazios
-    for (let [chave, valor] of Object.entries(dados)) {
+    for (const [chave, valor] of Object.entries(dados)) {
         if (!valor || valor.trim() === '') {
-            console.warn(`❌ Campo vazio: ${chave}`);
             mostrarToast(`❌ Campo "${chave}" não pode estar vazio`, 'error');
             return;
         }
     }
 
     try {
-        mostrarToast('⏳ Salvando técnico...', 'info');
-        console.log('🔄 Chamando API...');
-        
         await atualizarTecnicoAPI(id, dados);
-        
-        console.log('✅ Técnico atualizado com sucesso!');
-        mostrarToast('✅ Técnico atualizado com sucesso!', 'success');
-        
-        // Desabilitar campos após sucesso
+        mostrarToast('✅ Técnico atualizado!', 'success');
         cancelarEdicaoTecnico();
-        
-        // Recarregar dados
-        console.log('🔄 Recarregando lista de técnicos...');
         await carregarTecnicos();
-        
-        console.log('✅ Fluxo completo concluído');
     } catch (error) {
-        console.error('❌ Erro detalhado:', error);
-        console.error('❌ Stack:', error.stack);
-        mostrarToast(`❌ Erro ao atualizar técnico: ${error.message}`, 'error');
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
 }
 
 
-// ==================== OS UPDATE ====================
-async function atualizarOS(e) {
+// ==================== ATUALIZAR OS ====================
+async function submitAtualizarOS(e) {
     e.preventDefault();
-
-    const id = parseInt(document.getElementById('atualizar-os-id').value);
-
-    if (!id) {
-        mostrarToast('❌ Selecione uma OS primeiro', 'error');
-        return;
-    }
-
-    const dados = {
-        id: id,
-        novoStatus: document.getElementById('atualizar-os-status').value,
-        observacoes: document.getElementById('atualizar-os-descricao').value
-    };
+    const id = parseInt(obterValor('atualizar-os-id'));
+    if (!id) { mostrarToast('❌ Selecione uma OS primeiro', 'error'); return; }
 
     try {
-        const res = await fetch(`${API_BASE_URL}/ordens-servico/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        if (res.ok) {
-            mostrarToast('✅ OS atualizada com sucesso!', 'success');
-            
-            // Desabilitar campos após sucesso
-            cancelarEdicaoOS();
-            
-            // Recarregar dados
-            await carregarOrdens();
-        } else {
-            const errorMsg = await res.text();
-            mostrarToast(`❌ Erro: ${errorMsg || 'Falha ao atualizar OS'}`, 'error');
-        }
+        await atualizarStatusOS(
+            id,
+            obterValor('atualizar-os-status'),
+            obterValor('atualizar-os-descricao')
+        );
+        mostrarToast('✅ OS atualizada!', 'success');
+        cancelarEdicaoOS();
+        await carregarOrdens();
     } catch (error) {
-        console.error('Erro ao atualizar OS:', error);
-        mostrarToast(`❌ Erro ao atualizar OS: ${error.message}`, 'error');
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
-}
-
-
-// ==================== DELETE ====================
-async function deletarTecnicoConfirmado(id) {
-    await fetch(`${API_BASE_URL}/tecnico/${id}`, { method: 'DELETE' });
-    mostrarToast('✅ Técnico removido!', 'success');
-    carregarTecnicos();
-}
-
-async function deletarOSConfirmada(id) {
-    await fetch(`${API_BASE_URL}/ordens-servico/${id}`, { method: 'DELETE' });
-    mostrarToast('✅ OS cancelada!', 'success');
-    carregarOrdens();
-}
-
-
-// ==================== MODO EDIÇÃO ====================
-function ativarEdicaoTecnico() {
-    console.log('✏️ Ativando modo edição de técnico...');
-    const container = document.getElementById('tecnico-form-container');
-    if (!container) {
-        console.warn('⚠️ Container não encontrado');
-        return;
-    }
-
-    const campos = ['nome', 'email', 'telefone', 'especialidade', 'setor', 'status'];
-    
-    campos.forEach(f => {
-        const input = document.getElementById(`atualizar-tecnico-${f}`);
-        if (input) {
-            input.disabled = false;
-            console.log(`  ✅ Campo habilitado: atualizar-tecnico-${f}`);
-        } else {
-            console.warn(`  ❌ Campo não encontrado: atualizar-tecnico-${f}`);
-        }
-    });
-
-    const btnEditar = document.getElementById('btn-editar-tecnico');
-    const btnSalvar = document.getElementById('btn-salvar-tecnico');
-    const btnCancelar = document.getElementById('btn-cancelar-tecnico');
-    
-    if (btnEditar) btnEditar.style.display = 'none';
-    if (btnSalvar) btnSalvar.style.display = 'inline-block';
-    if (btnCancelar) btnCancelar.style.display = 'inline-block';
-    
-    console.log('✅ Modo edição ativado');
-}
-
-function cancelarEdicaoTecnico() {
-    console.log('❌ Cancelando edição de técnico...');
-    const campos = ['nome', 'email', 'telefone', 'especialidade', 'setor', 'status'];
-    
-    campos.forEach(f => {
-        const input = document.getElementById(`atualizar-tecnico-${f}`);
-        if (input) input.disabled = true;
-    });
-
-    const btnEditar = document.getElementById('btn-editar-tecnico');
-    const btnSalvar = document.getElementById('btn-salvar-tecnico');
-    const btnCancelar = document.getElementById('btn-cancelar-tecnico');
-    
-    if (btnEditar) btnEditar.style.display = 'inline-block';
-    if (btnSalvar) btnSalvar.style.display = 'none';
-    if (btnCancelar) btnCancelar.style.display = 'none';
-    
-    console.log('✅ Edição cancelada');
-}
-
-function ativarEdicaoOS() {
-    const container = document.getElementById('os-form-container');
-    if (!container) return;
-
-    const campos = ['status', 'tecnico', 'descricao', 'setor', 'data-conclusao'];
-    
-    campos.forEach(f => {
-        const input = document.getElementById(`atualizar-os-${f}`);
-        if (input) input.disabled = false;
-    });
-
-    document.getElementById('btn-editar-os').style.display = 'none';
-    document.getElementById('btn-salvar-os').style.display = 'inline-block';
-    document.getElementById('btn-cancelar-os').style.display = 'inline-block';
-}
-
-function cancelarEdicaoOS() {
-    const campos = ['status', 'tecnico', 'descricao', 'setor', 'data-conclusao'];
-    
-    campos.forEach(f => {
-        const input = document.getElementById(`atualizar-os-${f}`);
-        if (input) input.disabled = true;
-    });
-
-    document.getElementById('btn-editar-os').style.display = 'inline-block';
-    document.getElementById('btn-salvar-os').style.display = 'none';
-    document.getElementById('btn-cancelar-os').style.display = 'none';
 }
 
 
 // ==================== CARREGAR DADOS PARA EDIÇÃO ====================
 async function carregarDadosTecnico(id) {
-    if (!id) {
-        console.warn('⚠️ Nenhum técnico selecionado');
-        return;
-    }
-    
-    console.log('📥 Carregando dados do técnico:', id);
-    
+    if (!id) return;
     try {
         const tecnico = await buscarTecnico(id);
-        console.log('📦 Dados recebidos:', tecnico);
-        
-        // Preencher campos
-        document.getElementById('atualizar-tecnico-nome').value = tecnico.nome || '';
-        document.getElementById('atualizar-tecnico-email').value = tecnico.email || '';
-        document.getElementById('atualizar-tecnico-telefone').value = tecnico.telefone || '';
-        document.getElementById('atualizar-tecnico-especialidade').value = tecnico.especialidade || '';
-        document.getElementById('atualizar-tecnico-setor').value = tecnico.setor || '';
-        document.getElementById('atualizar-tecnico-status').value = tecnico.status || '';
-        
-        console.log('✅ Campos preenchidos');
-        
-        // Mostrar formulário de edição
-        const container = document.getElementById('tecnico-form-container');
-        if (container) {
-            container.style.display = 'block';
-            console.log('✅ Formulário exibido');
-        }
-        
-        // Garantir que campos comecem desabilitados
+        ['nome', 'email', 'telefone', 'especialidade', 'setor', 'status'].forEach(campo => {
+            const el = document.getElementById(`atualizar-tecnico-${campo}`);
+            if (el) el.value = tecnico[campo] || '';
+        });
+        document.getElementById('tecnico-form-container').classList.remove('hidden');
         cancelarEdicaoTecnico();
-        
         mostrarToast('✅ Técnico carregado. Clique em "Editar" para modificar', 'info');
     } catch (error) {
-        console.error('❌ Erro ao carregar técnico:', error);
-        mostrarToast(`❌ Erro ao carregar dados do técnico: ${error.message}`, 'error');
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
 }
 
@@ -541,59 +317,50 @@ async function carregarDadosOS(id) {
     if (!id) return;
     try {
         const ordem = await buscarOrdem(id);
-        
-        // Preencher campos
         document.getElementById('atualizar-os-status').value = ordem.status || '';
         document.getElementById('atualizar-os-tecnico').value = ordem.tecnico?.id || '';
         document.getElementById('atualizar-os-descricao').value = ordem.descricao || '';
         document.getElementById('atualizar-os-setor').value = ordem.setor || '';
-        
-        const dataConclusao = document.getElementById('atualizar-os-data-conclusao');
-        if (dataConclusao && ordem.dataConclusao) {
-            dataConclusao.value = ordem.dataConclusao.split('T')[0];
-        }
-        
-        // Mostrar formulário de edição
-        const container = document.getElementById('os-form-container');
-        if (container) container.style.display = 'block';
-        
-        // Garantir que campos comecem desabilitados
+        const dataConcEl = document.getElementById('atualizar-os-data-conclusao');
+        if (dataConcEl && ordem.dataConclusao) dataConcEl.value = ordem.dataConclusao.split('T')[0];
+        document.getElementById('os-form-container').classList.remove('hidden');
         cancelarEdicaoOS();
-        
         mostrarToast('✅ OS carregada. Clique em "Editar" para modificar', 'info');
     } catch (error) {
-        console.error('Erro ao carregar OS:', error);
-        mostrarToast(`❌ Erro ao carregar dados da OS: ${error.message}`, 'error');
+        mostrarToast(`❌ ${error.message}`, 'error');
     }
 }
 
 
-window.recarregarTecnicos = carregarTecnicos;
-window.recarregarEquipamentos = carregarEquipamentos;
-window.recarregarOrdens = carregarOrdens;
-
-// OS actions
-window.carregarDadosOS = carregarDadosOS;
-window.atualizarOS = atualizarOS;
-window.ativarEdicaoOS = ativarEdicaoOS;
-window.cancelarEdicaoOS = cancelarEdicaoOS;
-
-window.deletarOSSelecionada = async function() {
-    const id = document.getElementById('atualizar-os-id').value;
-    if (!id) { mostrarToast('❌ Selecione uma OS primeiro', 'error'); return; }
-    if (!confirm('Deseja realmente cancelar esta Ordem de Serviço?')) return;
-    await deletarOSConfirmada(id);
-};
-
-// técnico actions
+// ==================== GLOBALS ====================
 window.carregarDadosTecnico = carregarDadosTecnico;
-window.atualizarTecnico = atualizarTecnico;
-window.ativarEdicaoTecnico = ativarEdicaoTecnico;
+window.ativarEdicaoTecnico  = ativarEdicaoTecnico;
 window.cancelarEdicaoTecnico = cancelarEdicaoTecnico;
-
-window.deletarTecnicoSelecionado = async function() {
-    const id = document.getElementById('atualizar-tecnico-id').value;
+window.deletarTecnicoSelecionado = async function () {
+    const id = obterValor('atualizar-tecnico-id');
     if (!id) { mostrarToast('❌ Selecione um técnico primeiro', 'error'); return; }
     if (!confirm('Deseja realmente deletar este técnico?')) return;
-    await deletarTecnicoConfirmado(id);
+    try {
+        await desativarTecnico(id);
+        mostrarToast('✅ Técnico removido!', 'success');
+        await carregarTecnicos();
+    } catch (error) {
+        mostrarToast(`❌ ${error.message}`, 'error');
+    }
+};
+
+window.carregarDadosOS    = carregarDadosOS;
+window.ativarEdicaoOS     = ativarEdicaoOS;
+window.cancelarEdicaoOS   = cancelarEdicaoOS;
+window.deletarOSSelecionada = async function () {
+    const id = obterValor('atualizar-os-id');
+    if (!id) { mostrarToast('❌ Selecione uma OS primeiro', 'error'); return; }
+    if (!confirm('Deseja realmente cancelar esta Ordem de Serviço?')) return;
+    try {
+        await cancelarOrdemServico(id);
+        mostrarToast('✅ OS cancelada!', 'success');
+        await carregarOrdens();
+    } catch (error) {
+        mostrarToast(`❌ ${error.message}`, 'error');
+    }
 };

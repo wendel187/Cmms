@@ -1,7 +1,7 @@
 // ==================== EQUIPAMENTOS PAGE ====================
 
 import { carregarEquipamentos, carregarEquipamento, atualizarEquipamento, deletarEquipamento as deletarEquipamentoAPI } from '../../js/api.js';
-import { mostrarToast } from '../../js/utils.js';
+import { mostrarToast, formatarData } from '../../js/utils.js';
 import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
 
 /**
@@ -173,15 +173,6 @@ async function deletarEquipamento(id) {
         console.error('Erro ao deletar equipamento:', error);
         mostrarToast('❌ Erro ao deletar equipamento', 'error');
     }
-}
-
-/**
- * Formatar data para exibição
- */
-function formatarData(data) {
-    if (!data) return 'N/A';
-    const d = new Date(data);
-    return d.toLocaleDateString('pt-BR');
 }
 
 // Expor funções globais

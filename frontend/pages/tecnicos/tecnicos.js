@@ -99,8 +99,8 @@ async function editarTecnico(id) {
                 tipo: 'select',
                 opcoes: [
                     { value: 'DISPONIVEL', label: 'Disponível' },
-                    { value: 'OCUPADO', label: 'Ocupado' },
-                    { value: 'AUSENTE', label: 'Ausente' }
+                    { value: 'EM_PAUSA', label: 'Em Pausa' },
+                    { value: 'INDISPONIVEL', label: 'Indisponível' }
                 ]
             }
         ];

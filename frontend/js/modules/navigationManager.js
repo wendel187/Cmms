@@ -1,8 +1,6 @@
 /* ==================== GERENCIADOR DE NAVEGAÇÃO ====================
  Responsabilidade: Controlar mudança de abas, listagens e tipos de OS */
 
-import { API_BASE_URL } from '../config.js';
-
 /*
  * Mapeamento de abas dinâmicas com suas ações de carregamento
  */

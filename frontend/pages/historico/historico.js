@@ -1,41 +1,22 @@
-// ==================== PÁGINA DE HISTÓRICO DE OS ====================
+import { carregarHistoricoOS } from '../../js/api.js';
+import { mostrarToast, mostrarFeedback } from '../../js/utils.js';
 
-import { carregarHistoricoOS } from '../../js/services/historicoService.js';
-import { mostrarToast } from '../../js/utils.js';
-import { API_BASE_URL } from '../../js/config.js';
-
-// Elementos do DOM
-const formBuscar = document.getElementById('form-buscar-historico');
-const inputOsId = document.getElementById('historico-os-id');
-const feedbackEl = document.getElementById('historico-feedback');
-const resultsEl = document.getElementById('historico-results');
-const emptyEl = document.getElementById('historico-empty');
-const loadingEl = document.getElementById('historico-loading');
-const listaEl = document.getElementById('historico-lista');
-const tituloEl = document.getElementById('historico-titulo');
+const formBuscar   = document.getElementById('form-buscar-historico');
+const inputOsId    = document.getElementById('historico-os-id');
+const feedbackEl   = document.getElementById('historico-feedback');
+const resultsEl    = document.getElementById('historico-results');
+const emptyEl      = document.getElementById('historico-empty');
+const loadingEl    = document.getElementById('historico-loading');
+const listaEl      = document.getElementById('historico-lista');
+const tituloEl     = document.getElementById('historico-titulo');
 const quantidadeEl = document.getElementById('historico-quantidade');
 
-// ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
-    verificarConexao();
     formBuscar.addEventListener('submit', buscarHistorico);
 });
 
-// ==================== VERIFICAR CONEXÃO ====================
-async function verificarConexao() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/tecnicos`);
-        return response.ok;
-    } catch (error) {
-        console.error('Erro ao verificar conexão:', error);
-        return false;
-    }
-}
-
-// ==================== BUSCAR HISTÓRICO ====================
 async function buscarHistorico(e) {
     e.preventDefault();
-
     const osId = inputOsId.value.trim();
 
     if (!osId || isNaN(osId) || parseInt(osId) <= 0) {
@@ -43,33 +24,21 @@ async function buscarHistorico(e) {
         return;
     }
 
-    // Mostrar loading
-    emptyEl.style.display = 'none';
-    resultsEl.style.display = 'block';
-    loadingEl.style.display = 'flex';
-    listaEl.innerHTML = '';
-    feedbackEl.className = 'feedback';
+    emptyEl.style.display   = 'none';
+    resultsEl.style.display  = 'block';
+    loadingEl.style.display  = 'flex';
+    listaEl.innerHTML        = '';
+    feedbackEl.className     = 'feedback';
 
     try {
-        // Carregar dados
         const historico = await carregarHistoricoOS(osId);
-
-        // Atualizar título e quantidade
         tituloEl.textContent = `Histórico da OS #${osId}`;
-
-        // Renderizar resultados
         renderizarHistorico(historico, osId);
-
         mostrarToast('✅ Histórico carregado com sucesso!', 'success');
     } catch (error) {
-        console.error('Erro ao buscar histórico:', error);
-
         let mensagem = '❌ Erro ao carregar histórico';
-        if (error.message.includes('não encontrada')) {
-            mensagem = `❌ OS #${osId} não encontrada`;
-        } else if (error.message.includes('inválido')) {
-            mensagem = '❌ ID da OS inválido';
-        }
+        if (error.message.includes('não encontrada')) mensagem = `❌ OS #${osId} não encontrada`;
+        else if (error.message.includes('inválido'))  mensagem = '❌ ID da OS inválido';
 
         mostrarFeedback(feedbackEl, mensagem, 'error');
         loadingEl.style.display = 'none';
@@ -77,14 +46,11 @@ async function buscarHistorico(e) {
             <div class="item-empty">
                 <div class="item-empty-icon">⚠️</div>
                 <p>${mensagem}</p>
-            </div>
-        `;
-
+            </div>`;
         mostrarToast(mensagem, 'error');
     }
 }
 
-// ==================== RENDERIZAR HISTÓRICO ====================
 function renderizarHistorico(historico, osId) {
     loadingEl.style.display = 'none';
 
@@ -94,15 +60,12 @@ function renderizarHistorico(historico, osId) {
             <div class="item-empty">
                 <div class="item-empty-icon">📋</div>
                 <p>Nenhum histórico encontrado para a OS #${osId}</p>
-            </div>
-        `;
+            </div>`;
         return;
     }
 
     quantidadeEl.textContent = `(${historico.length} registro${historico.length !== 1 ? 's' : ''})`;
-
-    // Renderizar tabela
-    const tableHTML = `
+    listaEl.innerHTML = `
         <table class="historico-table">
             <thead>
                 <tr>
@@ -119,60 +82,37 @@ function renderizarHistorico(historico, osId) {
                         <td class="cell-data">${formatarDataHora(h.dataHora)}</td>
                         <td class="cell-status">${renderizarBadgeStatus(h.status)}</td>
                         <td class="cell-observacoes">${h.observacoes || '—'}</td>
-                    </tr>
-                `).join('')}
+                    </tr>`).join('')}
             </tbody>
-        </table>
-    `;
-
-    listaEl.innerHTML = tableHTML;
+        </table>`;
 }
 
-// ==================== FUNÇÕES AUXILIARES ====================
-
-/**
- * Formatar data/hora para o padrão brasileiro (dd/MM/yyyy HH:mm:ss)
- */
 function formatarDataHora(dataHora) {
     if (!dataHora) return '—';
     try {
         const d = new Date(dataHora);
-        const dia = String(d.getDate()).padStart(2, '0');
-        const mes = String(d.getMonth() + 1).padStart(2, '0');
-        const ano = d.getFullYear();
-        const hora = String(d.getHours()).padStart(2, '0');
-        const minuto = String(d.getMinutes()).padStart(2, '0');
-        const segundo = String(d.getSeconds()).padStart(2, '0');
-        return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+        return [
+            String(d.getDate()).padStart(2, '0'),
+            String(d.getMonth() + 1).padStart(2, '0'),
+            d.getFullYear()
+        ].join('/') + ' ' + [
+            String(d.getHours()).padStart(2, '0'),
+            String(d.getMinutes()).padStart(2, '0'),
+            String(d.getSeconds()).padStart(2, '0')
+        ].join(':');
     } catch {
         return dataHora;
     }
 }
 
-/**
- * Renderizar badge de status com cores apropriadas
- */
 function renderizarBadgeStatus(status) {
-    const statusMap = {
-        'ABERTA': { icon: '🔵', label: 'Aberta', classe: 'status-aberta' },
+    const mapa = {
+        'ABERTA':       { icon: '🔵', label: 'Aberta',      classe: 'status-aberta' },
         'EM_ANDAMENTO': { icon: '🟡', label: 'Em Andamento', classe: 'status-em-andamento' },
-        'CONCLUIDA': { icon: '🟢', label: 'Concluída', classe: 'status-concluida' },
-        'FINALIZADA': { icon: '🟢', label: 'Finalizada', classe: 'status-concluida' },
-        'CANCELADA': { icon: '🔴', label: 'Cancelada', classe: 'status-cancelada' }
+        'CONCLUIDA':    { icon: '🟢', label: 'Concluída',    classe: 'status-concluida' },
+        'FINALIZADA':   { icon: '🟢', label: 'Finalizada',   classe: 'status-concluida' },
+        'CANCELADA':    { icon: '🔴', label: 'Cancelada',    classe: 'status-cancelada' }
     };
-
-    const config = statusMap[status] || { icon: '⚪', label: status, classe: 'status-unknown' };
-
-    return `<span class="status-badge-inline ${config.classe}">${config.icon} ${config.label}</span>`;
+    const cfg = mapa[status] || { icon: '⚪', label: status, classe: 'status-unknown' };
+    return `<span class="status-badge-inline ${cfg.classe}">${cfg.icon} ${cfg.label}</span>`;
 }
-
-/**
- * Mostrar feedback em um elemento
- */
-function mostrarFeedback(elemento, mensagem, tipo) {
-    if (!elemento) return;
-    elemento.textContent = mensagem;
-    elemento.className = `feedback show ${tipo}`;
-}
-
-

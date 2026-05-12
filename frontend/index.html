@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMMS - Sistema de Gerenciamento de Manutenção</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Highlight checkbox when selected */
-        .checkbox-group input[type="checkbox"]:checked + span {
-            font-weight: bold;
-            color: green;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -56,9 +49,11 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- TAB: HOME - Cadastros -->
+
+            <!-- TAB: HOME -->
             <section id="home-tab" class="tab-content active">
                 <div class="section-grid">
+
                     <!-- Cadastro de Técnico -->
                     <div class="section-card">
                         <div class="section-header">
@@ -70,7 +65,6 @@
                                 <label for="tecnico-nome">Nome *</label>
                                 <input type="text" id="tecnico-nome" name="nome" required placeholder="Ex: João Silva">
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="tecnico-email">Email *</label>
@@ -81,7 +75,6 @@
                                     <input type="tel" id="tecnico-telefone" name="telefone" required placeholder="11 98765-4321">
                                 </div>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="tecnico-especialidade">Especialidade *</label>
@@ -92,7 +85,6 @@
                                     <input type="text" id="tecnico-setor" name="setor" required placeholder="Ex: Produção">
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label for="tecnico-status">Status *</label>
                                 <select id="tecnico-status" name="status" required>
@@ -102,7 +94,6 @@
                                     <option value="INDISPONIVEL">Indisponível</option>
                                 </select>
                             </div>
-
                             <button type="submit" class="btn btn-primary">
                                 <span class="icon">➕</span> Cadastrar Técnico
                             </button>
@@ -121,7 +112,6 @@
                                 <label for="equip-nome">Nome *</label>
                                 <input type="text" id="equip-nome" name="nome" required placeholder="Ex: Compressor AR">
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="equip-codigo">Código *</label>
@@ -132,7 +122,6 @@
                                     <input type="text" id="equip-setor" name="setor" required placeholder="Ex: Produção">
                                 </div>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="equip-status">Status *</label>
@@ -153,7 +142,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             <button type="submit" class="btn btn-primary">
                                 <span class="icon">➕</span> Cadastrar Equipamento
                             </button>
@@ -163,7 +151,7 @@
                 </div>
             </section>
 
-            <!-- TAB: TÉCNICOS - Gerenciar Técnicos -->
+            <!-- TAB: TÉCNICOS -->
             <section id="tecnicos-tab" class="tab-content">
                 <div class="section-card">
                     <div class="section-header">
@@ -176,7 +164,7 @@
                 </div>
             </section>
 
-            <!-- TAB: EQUIPAMENTOS - Gerenciar Equipamentos -->
+            <!-- TAB: EQUIPAMENTOS -->
             <section id="equipamentos-tab" class="tab-content">
                 <div class="section-card">
                     <div class="section-header">
@@ -189,7 +177,7 @@
                 </div>
             </section>
 
-            <!-- TAB: REQUISIÇÕES - Criar OS -->
+            <!-- TAB: REQUISIÇÕES -->
             <section id="requisicoes-tab" class="tab-content">
                 <div class="requisicoes-container">
                     <div class="tipo-os-selector">
@@ -205,7 +193,7 @@
                     <div id="form-corretiva-container" class="requisicao-form-container active">
                         <div class="section-card">
                             <div class="section-header">
-                                <h2>🔴 Nova Ordem de Serviço - Corretiva</h2>
+                                <h2>🔴 Nova OS Corretiva</h2>
                                 <p class="section-subtitle">Solicitação de conserto urgente</p>
                             </div>
                             <form id="form-os-corretiva" class="form">
@@ -223,17 +211,14 @@
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="form-group">
                                     <label for="corr-descricao">Descrição do Problema *</label>
                                     <textarea id="corr-descricao" name="descricao" required rows="3" placeholder="Descreva o problema..."></textarea>
                                 </div>
-
                                 <div class="form-group">
                                     <label for="corr-falha">Descrição da Falha *</label>
                                     <textarea id="corr-falha" name="descricaoFalha" required rows="3" placeholder="Detalhe a falha detectada..."></textarea>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="corr-setor">Setor *</label>
@@ -250,14 +235,12 @@
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="form-group checkbox-group">
                                     <label>
                                         <input type="checkbox" id="corr-falha-total" name="falhaTotal">
                                         <span>Falha Total (Equipamento não funciona)</span>
                                     </label>
                                 </div>
-
                                 <button type="submit" class="btn btn-primary btn-large">
                                     <span class="icon">📤</span> Abrir OS Corretiva
                                 </button>
@@ -270,7 +253,7 @@
                     <div id="form-preventiva-container" class="requisicao-form-container">
                         <div class="section-card">
                             <div class="section-header">
-                                <h2>🟡 Nova Ordem de Serviço - Preventiva</h2>
+                                <h2>🟡 Nova OS Preventiva</h2>
                                 <p class="section-subtitle">Manutenção programada e preventiva</p>
                             </div>
                             <form id="form-os-preventiva" class="form">
@@ -288,12 +271,10 @@
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="form-group">
                                     <label for="prev-descricao">Descrição da Manutenção *</label>
                                     <textarea id="prev-descricao" name="descricao" required rows="3" placeholder="Descreva a manutenção a ser realizada..."></textarea>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="prev-setor">Setor *</label>
@@ -304,7 +285,6 @@
                                         <input type="date" id="prev-data-prevista" name="dataPrevista" required>
                                     </div>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="prev-periodicidade">Periodicidade (dias) *</label>
@@ -315,7 +295,6 @@
                                         <input type="date" id="prev-ultima-manutencao" name="ultimaManutencao">
                                     </div>
                                 </div>
-
                                 <button type="submit" class="btn btn-primary btn-large">
                                     <span class="icon">📤</span> Abrir OS Preventiva
                                 </button>
@@ -326,8 +305,7 @@
                 </div>
             </section>
 
-
-            <!-- TAB: ORDENS - Visualizar Ordens -->
+            <!-- TAB: ORDENS -->
             <section id="ordens-tab" class="tab-content">
                 <div class="section-card">
                     <div class="section-header">
@@ -336,7 +314,7 @@
                             <span class="icon">🔄</span> Recarregar
                         </button>
                     </div>
-                    <div class="filter-section" style="margin-bottom: 12px;">
+                    <div class="filter-section">
                         <label for="filtro-status">Filtrar por Status:</label>
                         <select id="filtro-status" class="filter-select">
                             <option value="">Todos</option>
@@ -360,27 +338,26 @@
                     <form id="form-atualizar-tecnico" class="form">
                         <div class="form-group">
                             <label for="atualizar-tecnico-id">Selecionar Técnico *</label>
-                            <div style="display: flex; gap: 10px; align-items: flex-end;">
-                                <div style="flex: 1;">
+                            <div class="input-with-actions">
+                                <div class="flex-1">
                                     <select id="atualizar-tecnico-id" name="tecnicoId" required onchange="carregarDadosTecnico(this.value)">
                                         <option value="">Selecionar técnico...</option>
                                     </select>
                                 </div>
-                                <button type="button" id="btn-editar-tecnico" class="btn btn-warning" onclick="ativarEdicaoTecnico()" title="Editar informações do técnico">
+                                <button type="button" id="btn-editar-tecnico" class="btn btn-warning" onclick="ativarEdicaoTecnico()" title="Editar">
                                     <span class="icon">✏️</span> Editar
                                 </button>
-                                <button type="button" class="btn btn-danger" onclick="deletarTecnicoSelecionado()" title="Deletar o técnico selecionado">
+                                <button type="button" class="btn btn-danger" onclick="deletarTecnicoSelecionado()" title="Deletar">
                                     <span class="icon">🗑️</span> Deletar
                                 </button>
                             </div>
                         </div>
 
-                        <div id="tecnico-form-container" style="display: none;">
+                        <div id="tecnico-form-container" class="hidden">
                             <div class="form-group">
                                 <label for="atualizar-tecnico-nome">Nome *</label>
                                 <input type="text" id="atualizar-tecnico-nome" name="nome" required placeholder="Ex: João Silva" disabled>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-email">Email *</label>
@@ -391,7 +368,6 @@
                                     <input type="tel" id="atualizar-tecnico-telefone" name="telefone" required placeholder="11 98765-4321" disabled>
                                 </div>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-tecnico-especialidade">Especialidade *</label>
@@ -402,7 +378,6 @@
                                     <input type="text" id="atualizar-tecnico-setor" name="setor" required placeholder="Ex: Produção" disabled>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label for="atualizar-tecnico-status">Status *</label>
                                 <select id="atualizar-tecnico-status" name="status" required disabled>
@@ -412,12 +387,11 @@
                                     <option value="INDISPONIVEL">Indisponível</option>
                                 </select>
                             </div>
-
                             <div class="form-row">
-                                <button id="btn-salvar-tecnico" type="submit" class="btn btn-primary" style="display: none;">
+                                <button id="btn-salvar-tecnico" type="submit" class="btn btn-primary hidden">
                                     <span class="icon">💾</span> Salvar Alterações
                                 </button>
-                                <button id="btn-cancelar-tecnico" type="button" class="btn btn-secondary" onclick="cancelarEdicaoTecnico()" style="display: none;">
+                                <button id="btn-cancelar-tecnico" type="button" class="btn btn-secondary hidden" onclick="cancelarEdicaoTecnico()">
                                     <span class="icon">❌</span> Cancelar
                                 </button>
                             </div>
@@ -437,22 +411,22 @@
                     <form id="form-atualizar-os" class="form">
                         <div class="form-group">
                             <label for="atualizar-os-id">Selecionar Ordem de Serviço *</label>
-                            <div style="display: flex; gap: 10px; align-items: flex-end;">
-                                <div style="flex: 1;">
+                            <div class="input-with-actions">
+                                <div class="flex-1">
                                     <select id="atualizar-os-id" name="osId" required onchange="carregarDadosOS(this.value)">
                                         <option value="">Selecionar OS...</option>
                                     </select>
                                 </div>
-                                <button type="button" id="btn-editar-os" class="btn btn-warning" onclick="ativarEdicaoOS()" title="Editar informações da OS">
+                                <button type="button" id="btn-editar-os" class="btn btn-warning" onclick="ativarEdicaoOS()" title="Editar">
                                     <span class="icon">✏️</span> Editar
                                 </button>
-                                <button type="button" class="btn btn-danger" onclick="deletarOSSelecionada()" title="Cancelar a ordem selecionada">
+                                <button type="button" class="btn btn-danger" onclick="deletarOSSelecionada()" title="Cancelar OS">
                                     <span class="icon">🗑️</span> Deletar
                                 </button>
                             </div>
                         </div>
 
-                        <div id="os-form-container" style="display: none;">
+                        <div id="os-form-container" class="hidden">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-os-status">Status *</label>
@@ -471,12 +445,10 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label for="atualizar-os-descricao">Descrição</label>
                                 <textarea id="atualizar-os-descricao" name="descricao" rows="3" placeholder="Descrição da OS..." disabled></textarea>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="atualizar-os-setor">Setor</label>
@@ -487,12 +459,11 @@
                                     <input type="date" id="atualizar-os-data-conclusao" name="dataConclusao" disabled>
                                 </div>
                             </div>
-
                             <div class="form-row">
-                                <button id="btn-salvar-os" type="submit" class="btn btn-primary" style="display: none;">
+                                <button id="btn-salvar-os" type="submit" class="btn btn-primary hidden">
                                     <span class="icon">💾</span> Salvar Alterações
                                 </button>
-                                <button id="btn-cancelar-os" type="button" class="btn btn-secondary" onclick="cancelarEdicaoOS()" style="display: none;">
+                                <button id="btn-cancelar-os" type="button" class="btn btn-secondary hidden" onclick="cancelarEdicaoOS()">
                                     <span class="icon">❌</span> Cancelar
                                 </button>
                             </div>
