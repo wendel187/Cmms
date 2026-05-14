@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.Cmms.domain.equipamento.EquipamentoRepository;
 import com.example.Cmms.domain.ordemservico.DadosAtualizacaoOrdemServico;
 import com.example.Cmms.domain.ordemservico.DadosAtualizacaoStatusOS;
 import com.example.Cmms.domain.ordemservico.DadosCadastroOSCorretiva;
@@ -31,6 +32,7 @@ import com.example.Cmms.domain.ordemservico.HistoricoStatus;
 import com.example.Cmms.domain.ordemservico.HistoricoStatusRepository;
 import com.example.Cmms.domain.ordemservico.OrdemServicoRepository;
 import com.example.Cmms.domain.ordemservico.StatusOrdemServico;
+import com.example.Cmms.domain.tecnico.TecnicoRepository;
 import com.example.Cmms.exception.RecursoNaoEncontradoException;
 import com.example.Cmms.service.OrdemServicoService;
 
@@ -39,175 +41,202 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/ordens-servico")
 public class OrdemServicoController {
-    
+
     @Autowired
     private OrdemServicoService service;
-    
+
     @Autowired
     private OrdemServicoRepository repository;
-    
+
     @Autowired
     private HistoricoStatusRepository historicoRepository;
-    
+
+    @Autowired
+    private TecnicoRepository tecnicoRepository;
+
+    @Autowired
+    private EquipamentoRepository equipamentoRepository;
+
+    private String getNomeTecnico(Long tecnicoId) {
+        if (tecnicoId == null) return null;
+        return tecnicoRepository.findById(tecnicoId).map(t -> t.getNome()).orElse(null);
+    }
+
+    private String getNomeEquipamento(Long equipamentoId) {
+        if (equipamentoId == null) return null;
+        return equipamentoRepository.findById(equipamentoId).map(e -> e.getNome()).orElse(null);
+    }
+
+    private DadosDetalhamentoOrdemServico toDetalhamento(com.example.Cmms.domain.ordemservico.OrdemServico os) {
+        return new DadosDetalhamentoOrdemServico(os,
+                getNomeEquipamento(os.getEquipamentoId()),
+                getNomeTecnico(os.getTecnicoId()));
+    }
+
     // ===== OS CORRETIVA =====
-    
+
     @PostMapping("/corretiva")
     @Transactional
     public ResponseEntity criarOSCorretiva(
             @RequestBody @Valid DadosCadastroOSCorretiva dados,
             UriComponentsBuilder uriBuilder) {
-        
+
         var os = service.criarOSCorretiva(dados);
         var uri = uriBuilder
                 .path("/ordens-servico/{id}")
                 .buildAndExpand(os.getId())
                 .toUri();
-        
-        return ResponseEntity.created(uri).body(new DadosDetalhamentoOrdemServico(os));
+
+        return ResponseEntity.created(uri).body(toDetalhamento(os));
     }
-    
+
     // ===== OS PREVENTIVA =====
-    
+
     @PostMapping("/preventiva")
     @Transactional
     public ResponseEntity criarOSPreventiva(
             @RequestBody @Valid DadosCadastroOSPreventiva dados,
             UriComponentsBuilder uriBuilder) {
-        
+
         var os = service.criarOSPreventiva(dados);
         var uri = uriBuilder
                 .path("/ordens-servico/{id}")
                 .buildAndExpand(os.getId())
                 .toUri();
-        
-        return ResponseEntity.created(uri).body(new DadosDetalhamentoOrdemServico(os));
+
+        return ResponseEntity.created(uri).body(toDetalhamento(os));
     }
-    
+
     // ===== LISTAGEM =====
-    
+
     @GetMapping
     public ResponseEntity<Page<DadosListagemOrdemServico>> listarTodas(
             @PageableDefault(size = 10, sort = {"dataAbertura"}) Pageable paginacao) {
-        
+
         var page = repository.findAll(paginacao)
-                .map(DadosListagemOrdemServico::new);
+                .map(os -> new DadosListagemOrdemServico(os,
+                        getNomeEquipamento(os.getEquipamentoId()),
+                        getNomeTecnico(os.getTecnicoId())));
         return ResponseEntity.ok(page);
     }
-    
+
     @GetMapping("/abertas")
     public ResponseEntity<List<DadosDetalhamentoOrdemServico>> listarAbertas() {
         var abertas = service.listarOrdenadasPorPrioridade();
         var dtos = abertas.stream()
-                .map(DadosDetalhamentoOrdemServico::new)
+                .map(this::toDetalhamento)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-    
+
     @GetMapping("/status/{status}")
     public ResponseEntity<Page<DadosListagemOrdemServico>> listarPorStatus(
             @PathVariable StatusOrdemServico status,
             @PageableDefault(size = 10, sort = {"dataAbertura"}) Pageable paginacao) {
-        
+
         var page = service.listarPorStatus(status, paginacao)
-                .map(DadosListagemOrdemServico::new);
+                .map(os -> new DadosListagemOrdemServico(os,
+                        getNomeEquipamento(os.getEquipamentoId()),
+                        getNomeTecnico(os.getTecnicoId())));
         return ResponseEntity.ok(page);
     }
-    
+
     @GetMapping("/tecnico/{tecnicoId}")
     public ResponseEntity<Page<DadosListagemOrdemServico>> listarPorTecnico(
             @PathVariable Long tecnicoId,
             @PageableDefault(size = 10) Pageable paginacao) {
-        
+
         var page = service.listarPorTecnico(tecnicoId, paginacao)
-                .map(DadosListagemOrdemServico::new);
+                .map(os -> new DadosListagemOrdemServico(os,
+                        getNomeEquipamento(os.getEquipamentoId()),
+                        getNomeTecnico(os.getTecnicoId())));
         return ResponseEntity.ok(page);
     }
-    
+
     @GetMapping("/setor/{setor}")
     public ResponseEntity<List<DadosListagemOrdemServico>> listarPorSetor(
             @PathVariable String setor) {
-        
+
         var lista = service.listarPorSetor(setor);
         var dtos = lista.stream()
-                .map(DadosListagemOrdemServico::new)
+                .map(os -> new DadosListagemOrdemServico(os,
+                        getNomeEquipamento(os.getEquipamentoId()),
+                        getNomeTecnico(os.getTecnicoId())))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity obterPorId(@PathVariable Long id) {
         var os = repository.findById(id);
         if (os.isPresent()) {
-            return ResponseEntity.ok(new DadosDetalhamentoOrdemServico(os.get()));
+            return ResponseEntity.ok(toDetalhamento(os.get()));
         }
         return ResponseEntity.notFound().build();
     }
-    
+
     // ===== ATUALIZAÇÃO =====
-    
+
     @PutMapping("/status")
     @Transactional
     public ResponseEntity atualizarStatus(@RequestBody @Valid DadosAtualizacaoStatusOS dados) {
         service.atualizarStatus(dados);
         var os = repository.getReferenceById(dados.id());
-        return ResponseEntity.ok(new DadosDetalhamentoOrdemServico(os));
+        return ResponseEntity.ok(toDetalhamento(os));
     }
-    
-    /**
-     * Atualiza uma Ordem de Serviço
-     * Permite atualizar: descrição, status, técnico e observações
-     */
+
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity atualizarOrdemServico(
             @PathVariable Long id,
             @RequestBody @Valid DadosAtualizacaoOrdemServico dados) {
-        
+
         try {
             var osAtualizada = service.atualizarInformacoes(new DadosAtualizacaoOrdemServico(
                     id,
                     dados.descricao(),
                     dados.status(),
                     dados.tecnicoId(),
-                    dados.observacoes()
+                    dados.observacoes(),
+                    dados.dataConclusao()
             ));
-            return ResponseEntity.ok(new DadosDetalhamentoOrdemServico(osAtualizada));
+            return ResponseEntity.ok(toDetalhamento(osAtualizada));
         } catch (RecursoNaoEncontradoException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
-    
+
     // ===== HISTÓRICO =====
-    
+
     @GetMapping("/{id}/historico")
     public ResponseEntity<List<HistoricoStatus>> obterHistoricoOS(@PathVariable Long id) {
         var historico = service.obterHistoricoOS(id);
         return ResponseEntity.ok(historico);
     }
-    
+
     // ===== RELATÓRIOS =====
-    
+
     @GetMapping("/relatorios/top-prioridade")
     public ResponseEntity<List<DadosDetalhamentoOrdemServico>> relatorioTopPrioridade(
             @RequestParam(defaultValue = "10") int limite) {
-        
+
         var top = service.relatorioOSPorPrioridade(limite);
         var dtos = top.stream()
-                .map(DadosDetalhamentoOrdemServico::new)
+                .map(this::toDetalhamento)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-    
+
     @GetMapping("/relatorios/setores-com-abertas")
     public ResponseEntity<List<String>> relatorioSetoresComAbertas() {
         var setores = service.relatorioSetoresComOSAbertas();
         return ResponseEntity.ok(setores);
     }
-    
+
     // ===== EXCLUSÃO (LÓGICA) =====
-    
+
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity cancelarOS(@PathVariable Long id) {
@@ -219,4 +248,3 @@ public class OrdemServicoController {
         return ResponseEntity.notFound().build();
     }
 }
-

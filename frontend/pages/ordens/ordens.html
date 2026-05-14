@@ -1,31 +1,55 @@
-<!-- ORDENS DE SERVI«O - Listagem e Gerenciamento -->
+<!-- ORDENS DE SERVI√áO -->
 <section id="ordens-tab" class="tab-content">
     <div class="page-header">
-        <h2>?? Ordens de ServiÁo</h2>
+        <h2>üìã Ordens de Servi√ßo</h2>
         <div class="page-actions">
             <button class="btn btn-secondary" id="btn-recarregar-ordens">
-                <span class="icon">??</span> Recarregar
+                <span class="icon">üîÑ</span> Recarregar
             </button>
         </div>
     </div>
-    <!-- Filtros -->
+
     <div class="filter-section">
         <div class="filter-group">
-            <label for="filtro-status">Filtrar por Status:</label>
+            <label for="filtro-status">Status:</label>
             <select id="filtro-status" class="filter-select">
                 <option value="">Todos</option>
                 <option value="ABERTA">Aberta</option>
                 <option value="EM_ANDAMENTO">Em Andamento</option>
-                <option value="CONCLUIDA">ConcluÌda</option>
+                <option value="PAUSADA">Pausada</option>
+                <option value="CONCLUIDA">Conclu√≠da</option>
                 <option value="CANCELADA">Cancelada</option>
             </select>
         </div>
+
+        <div class="filter-group">
+            <label for="filtro-tipo">Tipo de OS:</label>
+            <select id="filtro-tipo" class="filter-select">
+                <option value="">Todos</option>
+                <option value="CORRETIVA">Corretiva</option>
+                <option value="PREVENTIVA">Preventiva</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filtro-tecnico">T√©cnico:</label>
+            <select id="filtro-tecnico" class="filter-select">
+                <option value="">Todos</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filtro-equipamento">Equipamento:</label>
+            <select id="filtro-equipamento" class="filter-select">
+                <option value="">Todos</option>
+            </select>
+        </div>
     </div>
+
     <div class="ordens-container">
-        <!-- Lista de ordens ser· renderizada aqui -->
         <div id="ordens-list" class="list-container">
             <div class="loading-spinner">
-                <span>? Carregando ordens...</span>
+                <span>‚è≥ Carregando ordens...</span>
             </div>
         </div>
     </div>

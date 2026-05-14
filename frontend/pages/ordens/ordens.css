@@ -26,12 +26,16 @@
     border-radius: 10px;
     margin-bottom: 20px;
     box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
 }
 
 .filter-group {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .filter-group label {
@@ -173,6 +177,24 @@
 .status-badge.cancelada {
     background: #f8d7da;
     color: #721c24;
+}
+
+.tipo-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.tipo-badge.corretiva {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.tipo-badge.preventiva {
+    background: #d1ecf1;
+    color: #0c5460;
 }
 
 .priority-badge {

@@ -1,0 +1,185 @@
+/* ==================== SHARED: páginas Atualizar (Técnico + OS) ==================== */
+
+.hidden {
+    display: none !important;
+}
+
+.at-select-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.at-select-row .flex-1 {
+    flex: 1;
+}
+
+.at-btn-acao {
+    white-space: nowrap;
+    height: 42px;
+    align-self: flex-end;
+}
+
+/* ---- Detail card ---- */
+.at-detail-card {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.at-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.at-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.at-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.at-card-info h3 {
+    font-size: 1.1rem;
+    color: var(--dark);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- Status pills ---- */
+.at-status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Técnico status */
+.at-status-disponivel    { background: #d4edda; color: #155724; }
+.at-status-em_manutencao { background: #fff3cd; color: #856404; }
+.at-status-ausente       { background: #e2e3e5; color: #383d41; }
+.at-status-indisponivel  { background: #f8d7da; color: #721c24; }
+
+/* OS status */
+.at-status-aberta        { background: #cce5ff; color: #004085; }
+.at-status-em_andamento  { background: #fff3cd; color: #856404; }
+.at-status-pausada       { background: #e2d9f3; color: #5a3d94; }
+.at-status-concluida     { background: #d4edda; color: #155724; }
+.at-status-cancelada     { background: #f8d7da; color: #721c24; }
+
+/* ---- Info grid ---- */
+.at-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.at-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.at-info-label {
+    font-size: 0.72rem;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.at-info-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--dark);
+    word-break: break-word;
+}
+
+/* ---- Edit form ---- */
+.at-edit-form {
+    background: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    padding: 20px;
+    animation: fadeIn 0.25s ease;
+}
+
+.at-edit-header {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0ecff;
+}
+
+.at-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* ---- Small button variant ---- */
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.83rem;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+}
+
+@media (max-width: 768px) {
+    .at-select-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .at-btn-acao {
+        height: auto;
+    }
+
+    .at-card-header {
+        flex-wrap: wrap;
+    }
+
+    .at-info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .at-form-actions {
+        flex-direction: column;
+    }
+}

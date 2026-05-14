@@ -9,7 +9,8 @@ public record DadosListagemEquipamento(
         Status status,
         Criticidade criticidade,
         String setor,
-        LocalDate dataAquisicao
+        LocalDate dataAquisicao,
+        LocalDate ultimaManutencao
 ) {
     public DadosListagemEquipamento(Equipamento equipamento) {
         this(
@@ -19,7 +20,8 @@ public record DadosListagemEquipamento(
                 equipamento.getStatus(),
                 equipamento.getCriticidade(),
                 equipamento.getSetor(),
-                equipamento.getDataAquisicao()
+                equipamento.getDataAquisicao(),
+                equipamento.getUltimaManutencao()
         );
     }
 }

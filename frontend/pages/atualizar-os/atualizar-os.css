@@ -1,0 +1,19 @@
+/* ==================== ATUALIZAR OS - estilos específicos ==================== */
+/* Estilos compartilhados estão em atualizar-tecnico.css */
+
+.at-os-id-badge {
+    width: 56px;
+    height: 48px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.3;
+    white-space: pre-line;
+}

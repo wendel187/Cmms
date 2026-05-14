@@ -25,10 +25,15 @@ public class OSCorretiva extends OrdemServico {
      * Quanto maior, mais prioritário
      */
     @Override
+    public TipoOrdemServico getTipo() {
+        return TipoOrdemServico.CORRETIVA;
+    }
+
+    @Override
     public int calcularPrioridade() {
         int prioridade = nivelCriticidade * 2;
         if (falhaTotal) {
-            prioridade += 10; // Falha total aumenta muito a prioridade
+            prioridade += 10;
         }
         return prioridade;
     }

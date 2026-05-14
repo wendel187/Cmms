@@ -1,270 +1,200 @@
-// ==================== ORDENS PAGE ====================
-
-import { carregarTodasOrdens, carregarOrdem, atualizarOS, cancelarOrdemServico } from '../../js/api.js';
-import { mostrarToast, formatarData } from '../../js/utils.js';
-import { mostrarModal, criarFormularioEdicao, obterValoresFormularioModal, fecharModal } from '../../js/modal.js';
+import {
+    carregarTodasOrdens,
+    carregarOrdem,
+    carregarTecnicos,
+    carregarEquipamentos,
+} from '../../js/api.js';
+import { mostrarToast, formatarData, getPrioridadeBadge } from '../../js/utils.js';
+import { mostrarModal, fecharModal } from '../../js/modal.js';
 
 let ordensGlobal = [];
+let _inicializado = false;
 
-/**
- * Inicializar página ORDENS
- */
+const TIPO_LABEL = { CORRETIVA: 'Corretiva', PREVENTIVA: 'Preventiva' };
+const STATUS_LABEL = {
+    ABERTA: 'Aberta',
+    EM_ANDAMENTO: 'Em Andamento',
+    PAUSADA: 'Pausada',
+    CONCLUIDA: 'Concluída',
+    CANCELADA: 'Cancelada',
+};
+
+// ─── Ponto de entrada ────────────────────────────────────────────────────────
+
 export function inicializarOrdens() {
-    const btnRecarregar = document.getElementById('btn-recarregar-ordens');
-    if (btnRecarregar) {
-        btnRecarregar.onclick = recarregarOrdens;
+    if (!_inicializado) {
+        setupHandlers();
+        _inicializado = true;
     }
-
-    const filtroStatus = document.getElementById('filtro-status');
-    if (filtroStatus) {
-        filtroStatus.onchange = filtrarOrdensPorStatus;
-    }
-
-    carregarOrdensPage();
+    carregarTudo();
 }
 
-/**
- * Carregar e exibir ordens
- */
-async function carregarOrdensPage() {
-    try {
-        const ordens = await carregarTodasOrdens();
-        ordensGlobal = ordens || [];
-        renderizarOrdens(ordensGlobal);
-    } catch (error) {
-        console.error('Erro ao carregar ordens:', error);
-        const listEl = document.getElementById('ordens-list');
-        if (listEl) {
-            listEl.innerHTML = `<div class="error-message">❌ Erro ao carregar ordens</div>`;
-        }
-        mostrarToast('❌ Erro ao carregar ordens', 'error');
-    }
-}
+function setupHandlers() {
+    document.getElementById('btn-recarregar-ordens').onclick = () => {
+        mostrarToast('🔄 Recarregando...', 'info');
+        carregarTudo();
+    };
 
-/**
- * Renderizar ordens na tela
- */
-function renderizarOrdens(ordens) {
-    const listEl = document.getElementById('ordens-list');
-
-    if (!listEl) return;
-
-    if (!ordens || ordens.length === 0) {
-        listEl.innerHTML = `
-            <div class="item-empty">
-                <div class="item-empty-icon">📋</div>
-                <p>Nenhuma ordem de serviço encontrada</p>
-            </div>
-        `;
-    } else {
-        listEl.innerHTML = ordens.map(o => `
-            <div class="item-card" data-id="${o.id}">
-                <div class="item-title">📋 OS #${o.id}</div>
-                <div class="item-detail">
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Tipo:</span>
-                        <span>${o.tipo || 'N/A'}</span>
-                    </div>
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Status:</span>
-                        <span class="status-badge ${o.status?.toLowerCase().replace('_', '-')}">${o.status || 'N/A'}</span>
-                    </div>
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Equipamento:</span>
-                        <span>${o.equipamento?.nome || 'N/A'}</span>
-                    </div>
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Técnico Responsável:</span>
-                        <span>${o.tecnico?.nome || 'Não atribuído'}</span>
-                    </div>
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Prioridade:</span>
-                        <span class="priority-badge ${String(o.prioridade || '').toLowerCase()}">${o.prioridade || 'N/A'}</span>
-                    </div>
-                    <div class="item-detail-row">
-                        <span class="item-detail-label">Data Abertura:</span>
-                        <span>${o.dataAbertura ? formatarData(o.dataAbertura) : 'N/A'}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        adicionarEventosCliqueOrdens();
-    }
-}
-
-/**
- * Adicionar evento de clique para exibir detalhes da OS
- */
-function adicionarEventosCliqueOrdens() {
-    const itens = document.querySelectorAll('.item-card');
-    itens.forEach(item => {
-        item.addEventListener('click', async () => {
-            const id = item.dataset.id;
-            if (id) {
-                await exibirDetalhesOrdem(id);
-            }
-        });
+    ['filtro-status', 'filtro-tipo', 'filtro-tecnico', 'filtro-equipamento'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.onchange = filtrarOrdens;
     });
 }
 
-/**
- * Exibir detalhes da OS em um modal
- */
-async function exibirDetalhesOrdem(id) {
-    try {
-        const ordem = await carregarOrdem(id);
+// ─── Carregamento de dados ────────────────────────────────────────────────────
 
-        const conteudo = `
-            <div class="detalhes-ordem">
-                <h3>Detalhes da OS #${ordem.id}</h3>
-                <p><strong>Tipo:</strong> ${ordem.tipo || 'N/A'}</p>
-                <p><strong>Status:</strong> ${ordem.status || 'N/A'}</p>
-                <p><strong>Equipamento:</strong> ${ordem.equipamento?.nome || 'N/A'}</p>
-                <p><strong>Técnico:</strong> ${ordem.tecnico?.nome || 'Não atribuído'}</p>
-                <p><strong>Prioridade:</strong> ${ordem.prioridade || 'N/A'}</p>
-                <p><strong>Data de Abertura:</strong> ${ordem.dataAbertura ? formatarData(ordem.dataAbertura) : 'N/A'}</p>
-                <p><strong>Descrição:</strong> ${ordem.descricao || 'N/A'}</p>
-            </div>
-        `;
+async function carregarTudo() {
+    mostrarLoading();
 
-        mostrarModal(`Detalhes da OS #${ordem.id}`, conteudo, [
-            {
-                label: 'Fechar',
-                classe: 'btn-secondary',
-                callback: fecharModal
-            }
-        ]);
-    } catch (error) {
-        console.error('Erro ao carregar detalhes da ordem:', error);
-        mostrarToast('❌ Erro ao carregar detalhes da ordem', 'error');
-    }
-}
+    const [tecnicos, equipamentos, ordens] = await Promise.all([
+        carregarTecnicos().catch(err => { console.error('[Ordens] Erro GET técnicos:', err); return []; }),
+        carregarEquipamentos().catch(err => { console.error('[Ordens] Erro GET equipamentos:', err); return []; }),
+        carregarTodasOrdens().catch(err => { console.error('[Ordens] Erro GET ordens:', err); return null; }),
+    ]);
 
-/**
- * Filtrar ordens por status
- */
-function filtrarOrdensPorStatus() {
-    const filtro = document.getElementById('filtro-status').value;
-    
-    if (!filtro) {
-        renderizarOrdens(ordensGlobal);
-    } else {
-        const ordensFiltradas = ordensGlobal.filter(o => o.status === filtro);
-        renderizarOrdens(ordensFiltradas);
-    }
-}
+    popularSelectTecnicos(tecnicos);
+    popularSelectEquipamentos(equipamentos);
 
-/**
- * Recarregar ordens
- */
-async function recarregarOrdens() {
-    mostrarToast('🔄 Recarregando ordens...', 'info');
-    await carregarOrdensPage();
-}
-
-/**
- * Editar ordem
- */
-async function editarOrdem(id) {
-    try {
-        const ordem = await carregarOrdem(id);
-        
-        const campos = [
-            { nome: 'id', label: 'ID', tipo: 'text', readonly: true },
-            {
-                nome: 'status',
-                label: 'Status',
-                tipo: 'select',
-                opcoes: [
-                    { value: 'ABERTA', label: 'Aberta' },
-                    { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
-                    { value: 'PAUSADA', label: 'Pausada' },
-                    { value: 'CONCLUIDA', label: 'Concluída' },
-                    { value: 'CANCELADA', label: 'Cancelada' }
-                ]
-            },
-            {
-                nome: 'prioridade',
-                label: 'Prioridade',
-                tipo: 'select',
-                opcoes: [
-                    { value: 'BAIXA', label: 'Baixa' },
-                    { value: 'MEDIA', label: 'Média' },
-                    { value: 'ALTA', label: 'Alta' },
-                    { value: 'CRITICA', label: 'Crítica' }
-                ]
-            },
-            { nome: 'descricao', label: 'Descrição', tipo: 'textarea' },
-            { nome: 'dataAbertura', label: 'Data Abertura', tipo: 'date', readonly: true },
-            { nome: 'dataFechamento', label: 'Data Fechamento', tipo: 'date' }
-        ];
-
-        const conteudoFormulario = criarFormularioEdicao(ordem, campos);
-
-        const nomesCampos = campos.map(c => c.nome);
-
-        mostrarModal('Editar Ordem de Serviço', conteudoFormulario, [
-            {
-                label: '💾 Salvar',
-                classe: 'btn-primary',
-                callback: async () => {
-                    await salvarOrdem(id, nomesCampos);
-                }
-            }
-        ]);
-    } catch (error) {
-        console.error('Erro ao editar ordem:', error);
-        mostrarToast('❌ Erro ao carregar dados da ordem', 'error');
-    }
-}
-
-/**
- * Salvar ordem editada
- */
-async function salvarOrdem(id, nomesCampos) {
-    try {
-        const valores = obterValoresFormularioModal(nomesCampos);
-        
-        // Remover campos que não devem ser atualizados
-        delete valores.id;
-        delete valores.dataAbertura;
-
-        await atualizarOS(id, valores);
-        mostrarToast('✅ Ordem atualizada com sucesso!', 'success');
-        fecharModal();
-        await recarregarOrdens();
-    } catch (error) {
-        console.error('Erro ao salvar ordem:', error);
-        mostrarToast('❌ Erro ao atualizar ordem', 'error');
-    }
-}
-
-/**
- * Deletar/Cancelar ordem de serviço
- * @param {number} id - ID da ordem
- */
-async function deletarOrdem(id) {
-    const confirmacao = confirm('⚠️ Cancelar esta ordem de serviço? Essa ação não pode ser desfeita.');
-    
-    if (!confirmacao) {
-        mostrarToast('❌ Operação cancelada', 'info');
+    if (ordens === null) {
+        mostrarErro();
+        mostrarToast('❌ Erro ao carregar ordens', 'error');
         return;
     }
 
+    ordensGlobal = ordens;
+    filtrarOrdens(); // aplica filtros ativos ao renderizar
+}
+
+function popularSelectTecnicos(tecnicos) {
+    const el = document.getElementById('filtro-tecnico');
+    if (!el) return;
+    el.innerHTML = '<option value="">Todos</option>' +
+        tecnicos.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+}
+
+function popularSelectEquipamentos(equipamentos) {
+    const el = document.getElementById('filtro-equipamento');
+    if (!el) return;
+    el.innerHTML = '<option value="">Todos</option>' +
+        equipamentos.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+}
+
+// ─── Filtragem ────────────────────────────────────────────────────────────────
+
+function filtrarOrdens() {
+    const status       = document.getElementById('filtro-status')?.value      || '';
+    const tipo         = document.getElementById('filtro-tipo')?.value         || '';
+    const tecnicoId    = document.getElementById('filtro-tecnico')?.value     || '';
+    const equipId      = document.getElementById('filtro-equipamento')?.value || '';
+
+    renderizar(ordensGlobal.filter(o => {
+        if (status    && o.status          !== status)              return false;
+        if (tipo      && o.tipo            !== tipo)                return false;
+        if (tecnicoId && String(o.tecnicoId)   !== tecnicoId)      return false;
+        if (equipId   && String(o.equipamentoId) !== equipId)      return false;
+        return true;
+    }));
+}
+
+// ─── Renderização ─────────────────────────────────────────────────────────────
+
+function renderizar(lista) {
+    const el = document.getElementById('ordens-list');
+    if (!el) return;
+
+    if (!lista || lista.length === 0) {
+        el.innerHTML = `
+            <div class="item-empty">
+                <div class="item-empty-icon">📋</div>
+                <p>Nenhuma ordem de serviço encontrada</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = lista.map(o => {
+        const tipoCss   = (o.tipo   || '').toLowerCase();
+        const statusCss = (o.status || '').toLowerCase().replace('_', '-');
+
+        return `
+        <div class="item-card os-card" data-id="${o.id}" style="cursor:pointer">
+            <div class="item-title">📋 OS #${o.id}</div>
+            <div class="item-detail">
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Tipo:</span>
+                    <span class="tipo-badge ${tipoCss}">${TIPO_LABEL[o.tipo] || o.tipo || 'N/A'}</span>
+                </div>
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Status:</span>
+                    <span class="status-badge ${statusCss}">${STATUS_LABEL[o.status] || o.status || 'N/A'}</span>
+                </div>
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Equipamento:</span>
+                    <span>${o.nomeEquipamento || resolverNomeEquipamento(o.equipamentoId)}</span>
+                </div>
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Técnico:</span>
+                    <span>${o.nomeTecnico || resolverNomeTecnico(o.tecnicoId)}</span>
+                </div>
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Prioridade:</span>
+                    <span>${getPrioridadeBadge(o.prioridade)}</span>
+                </div>
+                <div class="item-detail-row">
+                    <span class="item-detail-label">Data Abertura:</span>
+                    <span>${o.dataAbertura ? formatarData(o.dataAbertura) : 'N/A'}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    el.querySelectorAll('.os-card').forEach(card => {
+        card.addEventListener('click', () => abrirDetalhes(card.dataset.id));
+    });
+}
+
+function resolverNomeTecnico(id) {
+    if (!id) return 'Não atribuído';
+    const opt = document.querySelector(`#filtro-tecnico option[value="${id}"]`);
+    return opt ? opt.textContent : `Técnico #${id}`;
+}
+
+function resolverNomeEquipamento(id) {
+    if (!id) return 'N/A';
+    const opt = document.querySelector(`#filtro-equipamento option[value="${id}"]`);
+    return opt ? opt.textContent : `Equipamento #${id}`;
+}
+
+// ─── Modal de detalhes ────────────────────────────────────────────────────────
+
+async function abrirDetalhes(id) {
     try {
-        mostrarToast('🗑️ Cancelando ordem...', 'info');
-        
-        await cancelarOrdemServico(id);
-        mostrarToast('✅ Ordem cancelada com sucesso!', 'success');
-        await recarregarOrdens();
-    } catch (error) {
-        console.error('Erro ao cancelar ordem:', error);
-        mostrarToast('❌ Erro ao cancelar ordem', 'error');
+        const o = await carregarOrdem(id);
+        mostrarModal(`OS #${o.id} — Detalhes`, `
+            <div class="detalhes-ordem">
+                <p><strong>Tipo:</strong>          ${TIPO_LABEL[o.tipo]   || o.tipo   || '—'}</p>
+                <p><strong>Status:</strong>        ${STATUS_LABEL[o.status] || o.status || '—'}</p>
+                <p><strong>Equipamento:</strong>   ${o.nomeEquipamento || resolverNomeEquipamento(o.equipamentoId)}</p>
+                <p><strong>Técnico:</strong>       ${o.nomeTecnico     || resolverNomeTecnico(o.tecnicoId)}</p>
+                <p><strong>Setor:</strong>         ${o.setor           || '—'}</p>
+                <p><strong>Prioridade:</strong>    ${getPrioridadeBadge(o.prioridade)}</p>
+                <p><strong>Data Abertura:</strong> ${o.dataAbertura ? formatarData(o.dataAbertura) : '—'}</p>
+                <p><strong>Descrição:</strong>     ${o.descricao       || '—'}</p>
+            </div>`,
+            [{ label: 'Fechar', classe: 'btn-secondary', callback: fecharModal }]
+        );
+    } catch {
+        mostrarToast('❌ Erro ao carregar detalhes da OS', 'error');
     }
 }
 
-// Expor funções globais
-window.editarOrdem = editarOrdem;
-window.deletarOrdem = deletarOrdem;
+// ─── Estados de UI ────────────────────────────────────────────────────────────
 
+function mostrarLoading() {
+    const el = document.getElementById('ordens-list');
+    if (el) el.innerHTML = '<div class="loading-spinner"><span>⏳ Carregando ordens...</span></div>';
+}
+
+function mostrarErro() {
+    const el = document.getElementById('ordens-list');
+    if (el) el.innerHTML = '<div class="item-empty"><div class="item-empty-icon">❌</div><p>Erro ao carregar ordens</p></div>';
+}

@@ -80,6 +80,9 @@ public abstract class OrdemServico {
         if (dados.tecnicoId() != null) {
             this.tecnicoId = dados.tecnicoId();
         }
+        if (dados.dataConclusao() != null) {
+            this.dataConclusao = dados.dataConclusao();
+        }
     }
 }
 

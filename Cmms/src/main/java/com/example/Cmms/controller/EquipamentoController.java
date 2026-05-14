@@ -71,10 +71,12 @@ public class EquipamentoController {
         return ResponseEntity.ok(page);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity atualizarEquipamento(@RequestBody @Valid DadosAtualizacaoEquipamento dados) {
-        var equipamento = repository.getReferenceById(dados.id());
+    public ResponseEntity atualizarEquipamento(
+            @PathVariable Long id,
+            @RequestBody @Valid DadosAtualizacaoEquipamento dados) {
+        var equipamento = repository.getReferenceById(id);
         equipamento.atualizarInformacoes(dados);
         return ResponseEntity.ok(new DadosDetalhamentoEquipamento(equipamento));
     }

@@ -34,6 +34,8 @@ public class Equipamento {
     @CreationTimestamp
     private LocalDate dataAquisicao;
 
+    private LocalDate ultimaManutencao;
+
     // Construtor customizado para aceitar DadosCadastroEquipamento
     public Equipamento(DadosCadastroEquipamento dados) {
         this.nome = dados.nome();
@@ -58,6 +60,9 @@ public class Equipamento {
         }
         if (dados.setor() != null) {
             this.setor = dados.setor();
+        }
+        if (dados.ultimaManutencao() != null) {
+            this.ultimaManutencao = dados.ultimaManutencao();
         }
     }
 

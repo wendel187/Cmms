@@ -1,0 +1,127 @@
+<!-- REQUISIÇÕES OS - Criação de Ordens de Serviço -->
+<section id="requisicoes-tab" class="tab-content">
+    <div class="requisicoes-container">
+        <div class="tipo-os-selector">
+            <button class="tipo-btn active" data-tipo="corretiva">
+                <span class="icon">🔴</span> OS Corretiva
+            </button>
+            <button class="tipo-btn" data-tipo="preventiva">
+                <span class="icon">🟡</span> OS Preventiva
+            </button>
+        </div>
+
+        <!-- OS CORRETIVA -->
+        <div id="form-corretiva-container" class="requisicao-form-container active">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>🔴 Nova OS Corretiva</h2>
+                    <p class="section-subtitle">Solicitação de conserto urgente</p>
+                </div>
+                <form id="form-os-corretiva" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="corr-equipamento">Equipamento *</label>
+                            <select id="corr-equipamento" name="equipamentoId" required>
+                                <option value="">Selecionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="corr-tecnico">Técnico Responsável *</label>
+                            <select id="corr-tecnico" name="tecnicoId" required>
+                                <option value="">Selecionar...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="corr-descricao">Descrição do Problema *</label>
+                        <textarea id="corr-descricao" name="descricao" required rows="3" placeholder="Descreva o problema..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="corr-falha">Descrição da Falha *</label>
+                        <textarea id="corr-falha" name="descricaoFalha" required rows="3" placeholder="Detalhe a falha detectada..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="corr-setor">Setor *</label>
+                            <input type="text" id="corr-setor" name="setor" required placeholder="Ex: Produção">
+                        </div>
+                        <div class="form-group">
+                            <label for="corr-criticidade">Nível de Criticidade *</label>
+                            <select id="corr-criticidade" name="nivelCriticidade" required>
+                                <option value="">Selecionar...</option>
+                                <option value="1">1 - Baixa</option>
+                                <option value="2">2 - Média</option>
+                                <option value="3">3 - Alta</option>
+                                <option value="4">4 - Crítica</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="corr-falha-total" name="falhaTotal">
+                            <span>Falha Total (Equipamento não funciona)</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span class="icon">📤</span> Abrir OS Corretiva
+                    </button>
+                </form>
+                <div id="corretiva-feedback" class="feedback"></div>
+            </div>
+        </div>
+
+        <!-- OS PREVENTIVA -->
+        <div id="form-preventiva-container" class="requisicao-form-container">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>🟡 Nova OS Preventiva</h2>
+                    <p class="section-subtitle">Manutenção programada e preventiva</p>
+                </div>
+                <form id="form-os-preventiva" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prev-equipamento">Equipamento *</label>
+                            <select id="prev-equipamento" name="equipamentoId" required>
+                                <option value="">Selecionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prev-tecnico">Técnico Responsável *</label>
+                            <select id="prev-tecnico" name="tecnicoId" required>
+                                <option value="">Selecionar...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="prev-descricao">Descrição da Manutenção *</label>
+                        <textarea id="prev-descricao" name="descricao" required rows="3" placeholder="Descreva a manutenção a ser realizada..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prev-setor">Setor *</label>
+                            <input type="text" id="prev-setor" name="setor" required placeholder="Ex: Produção">
+                        </div>
+                        <div class="form-group">
+                            <label for="prev-data-prevista">Data Prevista *</label>
+                            <input type="date" id="prev-data-prevista" name="dataPrevista" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prev-periodicidade">Periodicidade (dias) *</label>
+                            <input type="number" id="prev-periodicidade" name="periodicidadeDias" required min="1" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="prev-ultima-manutencao">Última Manutenção</label>
+                            <input type="date" id="prev-ultima-manutencao" name="ultimaManutencao">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span class="icon">📤</span> Abrir OS Preventiva
+                    </button>
+                </form>
+                <div id="preventiva-feedback" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>

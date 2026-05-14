@@ -9,7 +9,8 @@ const TAB_HANDLERS = {
     'equipamentos': () => carregarEquipamentosPage(),
     'ordens': () => carregarOrdensPage(),
     'atualizar-tecnico': () => carregarTecnicos(),
-    'atualizar-os': () => Promise.all([carregarOrdens(), carregarTecnicos()])
+    'atualizar-os': () => Promise.all([carregarOrdens(), carregarTecnicos()]),
+    'relatorios': () => carregarRelatoriosPage(),
 };
 
 /**
@@ -87,6 +88,7 @@ let carregarOrdensPage = () => {};
 let carregarTecnicos = () => {};
 let carregarOrdens = () => {};
 let carregarHistoricoOS = () => {};
+let carregarRelatoriosPage = () => {};
 
 /**
  * Configurar funções de carregamento para as abas
@@ -100,5 +102,6 @@ export function setCarregadores(handlers) {
     carregarTecnicos = handlers.carregarTecnicos;
     carregarOrdens = handlers.carregarOrdens;
     carregarHistoricoOS = handlers.carregarHistoricoOS;
+    if (handlers.carregarRelatoriosPage) carregarRelatoriosPage = handlers.carregarRelatoriosPage;
 }
 

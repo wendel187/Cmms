@@ -46,13 +46,13 @@ class CORSRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    
+
     with socketserver.TCPServer(("", PORT), CORSRequestHandler) as httpd:
         print(f"🚀 Servidor frontend iniciado!")
         print(f"📍 http://localhost:{PORT}")
         print(f"🔗 Backend: http://localhost:8080")
         print(f"⌨️  Pressione Ctrl+C para parar\n")
-        
+
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

@@ -29,7 +29,13 @@ public class OSPreventiva extends OrdemServico {
      * Se passou da data, prioridade máxima
      */
     @Override
+    public TipoOrdemServico getTipo() {
+        return TipoOrdemServico.PREVENTIVA;
+    }
+
+    @Override
     public int calcularPrioridade() {
+        if (dataPrevista == null) return 0;
         long diasFaltantes = ChronoUnit.DAYS.between(LocalDate.now(), dataPrevista);
         
         if (diasFaltantes <= 0) {
