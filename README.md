@@ -8,6 +8,47 @@
 
 ---
 
+## ⚡ Quick Start — Como Rodar o Projeto
+
+> Siga esta ordem exatamente. O projeto tem **duas partes**: um backend (Spring Boot) e um frontend (HTML servido por Python).
+
+### Pré-requisitos necessários
+| Software | Versão mínima | Como verificar |
+|----------|---------------|----------------|
+| Java | 17+ | `java -version` |
+| MySQL | 8.0+ | `mysql --version` |
+| Python | 3.x | `python --version` |
+
+### Passo 1 — Criar o banco de dados MySQL
+
+Abra o **MySQL Workbench** (ou terminal MySQL) e execute o script:
+
+```
+Cmms/src/main/resources/db.migration/init_database.sql
+```
+
+Isso cria o banco `cmms_db` e insere dados de exemplo prontos para testar.
+
+> **Atenção:** Por padrão o projeto usa `root` sem senha. Se o seu MySQL tiver senha, é **obrigatório** mudar em **dois arquivos**:
+> 1. `Cmms/src/main/resources/application.yaml` → campo `password:`
+> 2. `Cmms/src/main/java/com/example/Cmms/connection/ConnectionFactory.java` → campo `PASSWORD`
+
+### Passo 2 — Iniciar o Projeto
+
+Na pasta raiz do projeto, dê **duplo clique** no arquivo:
+
+```
+start.cmd
+```
+
+Ele abre dois terminais automaticamente: um para o backend e outro para o frontend.
+
+Aguarde o backend mostrar `Started CmmsApplication`, depois acesse `http://localhost:3000` no navegador.
+
+> `start.cmd` usa `python server.py` internamente para o frontend. Python 3 precisa estar instalado.
+
+---
+
 ## 📋 Índice
 1. [Visão Geral](#visão-geral)
 2. [Requisitos](#requisitos)
@@ -902,7 +943,9 @@ Solução:
 ### Erro: "Access denied for user"
 ```
 Problema: Credenciais MySQL incorretas
-Solução: Editar application.yaml com suas credenciais corretas
+Solução: Editar AMBOS os arquivos com suas credenciais:
+  1. Cmms/src/main/resources/application.yaml → campo password:
+  2. Cmms/src/main/java/com/example/Cmms/connection/ConnectionFactory.java → campo PASSWORD
 ```
 
 ### Erro: "Table doesn't exist"
@@ -912,6 +955,18 @@ Solução:
   - Opção 1: Executar init_database.sql
   - Opção 2: Deixar Hibernate criar (ddl-auto: update)
   - Opção 3: Executar CREATE DATABASE cmms_db;
+```
+
+### Frontend não abre / página em branco
+```
+Problema 1: Backend não está rodando
+Solução: Inicie o backend primeiro (Passo 2 do Quick Start), depois o frontend
+
+Problema 2: Python não está instalado
+Solução: Instale Python 3 em https://python.org/downloads e marque "Add to PATH"
+
+Problema 3: Porta 3000 ocupada
+Solução: Edite frontend/server.py linha 12: PORT = 3001 (ou outra porta livre)
 ```
 
 ### Erro de Compilação com Lombok
