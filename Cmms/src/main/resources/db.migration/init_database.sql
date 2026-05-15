@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
     data_prevista DATE,
     periodicidade_dias INT,
     ultima_manutencao DATE,
+    FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
     FOREIGN KEY (tecnico_id) REFERENCES tecnicos(id),
     INDEX idx_status (status),
     INDEX idx_equipamento (equipamento_id),
